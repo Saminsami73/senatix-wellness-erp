@@ -20,7 +20,7 @@ import {
   Doctor,
   DoctorExpense,
 } from '@/types/erp';
-import { isSupabaseConfigured, fetchFromCloud, syncRecordToCloud } from '@/lib/supabase';
+import { isSupabaseConfigured, fetchFromCloud, syncRecordToCloud, deleteRecordFromCloud, generateUUID } from '@/lib/supabase';
 
 // SEED DATA FOR IMMEDIATE OUT-OF-THE-BOX OPERATION
 const initialMarkets: Market[] = [
@@ -1007,6 +1007,7 @@ class ERPStore {
   public addEmployee(emp: Employee) {
     this.employees.push(emp);
     this.saveToStorage();
+    syncRecordToCloud('employees', emp);
     return emp;
   }
 
@@ -1016,6 +1017,10 @@ class ERPStore {
       this.currentUser = { ...this.currentUser, ...updates };
     }
     this.saveToStorage();
+    const updated = this.employees.find((e) => e.emp_id === emp_id);
+    if (updated) {
+      syncRecordToCloud('employees', updated);
+    }
   }
 
   // CUSTOMERS
@@ -1111,7 +1116,7 @@ class ERPStore {
   public addDoctor(doc: Omit<Doctor, 'id' | 'created_at'>): Doctor {
     const newDoc: Doctor = {
       ...doc,
-      id: `doc-${Date.now()}`,
+      id: generateUUID(),
       doctor_code: doc.doctor_code || `DOC-${Math.floor(1000 + Math.random() * 9000)}`,
       prescriptions_written_monthly: doc.prescriptions_written_monthly || 0,
       total_promotional_expense: doc.total_promotional_expense || 0,
@@ -1129,6 +1134,7 @@ class ERPStore {
     if (idx === -1) return null;
     this.doctors[idx] = { ...this.doctors[idx], ...updates };
     this.saveToStorage();
+    syncRecordToCloud('doctors', this.doctors[idx]);
     return this.doctors[idx];
   }
 
@@ -1137,6 +1143,7 @@ class ERPStore {
     this.doctors = this.doctors.filter((d) => d.id !== id);
     if (this.doctors.length !== initialLen) {
       this.saveToStorage();
+      deleteRecordFromCloud('doctors', 'id', id);
       return true;
     }
     return false;
@@ -1166,7 +1173,7 @@ class ERPStore {
   public addDoctorExpense(exp: Omit<DoctorExpense, 'id' | 'created_at'>): DoctorExpense {
     const newExpense: DoctorExpense = {
       ...exp,
-      id: `dexp-${Date.now()}`,
+      id: generateUUID(),
       created_at: new Date().toISOString(),
     };
     this.doctorExpenses.unshift(newExpense);
@@ -1178,12 +1185,13 @@ class ERPStore {
       if (exp.prescriptions_written_count && exp.prescriptions_written_count > 0) {
         doc.prescriptions_written_monthly = (doc.prescriptions_written_monthly || 0) + Number(exp.prescriptions_written_count);
       }
+      syncRecordToCloud('doctors', doc);
     }
 
     // Auto-record under company operational expenses if financial cost occurred
     if (exp.amount > 0) {
-      this.expenses.unshift({
-        id: `exp-${Date.now()}`,
+      const promoExp: Expense = {
+        id: generateUUID(),
         expense_date: exp.expense_date,
         category: 'Doctor_Gift',
         title: `Doctor Promo: ${doc?.name || 'Doctor'} - ${exp.title}`,
@@ -1191,7 +1199,9 @@ class ERPStore {
         payment_method: 'Cash',
         entered_by_emp_id: exp.emp_id,
         entered_by_name: this.currentUser.name,
-      });
+      };
+      this.expenses.unshift(promoExp);
+      syncRecordToCloud('expenses', promoExp);
     }
 
     this.saveToStorage();
@@ -1217,17 +1227,22 @@ class ERPStore {
   public addProduct(prod: Omit<Product, 'id' | 'stock'>) {
     const newProd: Product = {
       ...prod,
-      id: `prod-${Date.now()}`,
+      id: generateUUID(),
       stock: 0,
     };
     this.products.push(newProd);
     this.saveToStorage();
+    syncRecordToCloud('products', newProd);
     return newProd;
   }
 
   public updateProduct(id: string, updates: Partial<Product>) {
     this.products = this.products.map((p) => (p.id === id ? { ...p, ...updates } : p));
     this.saveToStorage();
+    const updated = this.products.find((p) => p.id === id);
+    if (updated) {
+      syncRecordToCloud('products', updated);
+    }
   }
 
   public getProductBatches(): ProductBatch[] {
@@ -1248,10 +1263,11 @@ class ERPStore {
   public addBatch(batch: Omit<ProductBatch, 'id'>) {
     const newBatch: ProductBatch = {
       ...batch,
-      id: `batch-${Date.now()}`,
+      id: generateUUID(),
     };
     this.batches.push(newBatch);
     this.saveToStorage();
+    syncRecordToCloud('product_batches', newBatch);
     return newBatch;
   }
 
@@ -1313,31 +1329,38 @@ class ERPStore {
       (e) => e.emp_id === empId && e.product_id === productId && e.batch_id === batchId
     );
 
+    let targetEmpStock: EmpStock;
     if (existing) {
       existing.qty += qty;
+      targetEmpStock = existing;
     } else {
-      this.empStock.push({
-        id: `es-${Date.now()}`,
+      targetEmpStock = {
+        id: generateUUID(),
         emp_id: empId,
         product_id: productId,
         batch_id: batchId,
         qty,
-      });
+      };
+      this.empStock.push(targetEmpStock);
     }
 
-    this.stockTransfers.push({
-      id: `st-${Date.now()}`,
+    const newTransfer = {
+      id: generateUUID(),
       transfer_ref: `TRF-${Date.now().toString().slice(-6)}`,
-      transfer_type: 'Warehouse_To_Employee',
+      transfer_type: 'Warehouse_To_Employee' as const,
       emp_id: empId,
       product_id: productId,
       batch_id: batchId,
       qty,
       approved_by_emp_id: this.currentUser.emp_id,
       transfer_date: new Date().toISOString().split('T')[0],
-    });
+    };
+    this.stockTransfers.push(newTransfer);
 
     this.saveToStorage();
+    syncRecordToCloud('product_batches', batch);
+    syncRecordToCloud('emp_stock', targetEmpStock);
+    syncRecordToCloud('stock_transfers', newTransfer);
   }
 
   public transferStockBackToWarehouse(empId: string, productId: string, batchId: string, qty: number) {
@@ -1354,19 +1377,23 @@ class ERPStore {
       batch.warehouse_qty += qty;
     }
 
-    this.stockTransfers.push({
-      id: `st-${Date.now()}`,
+    const newTransfer = {
+      id: generateUUID(),
       transfer_ref: `RTN-${Date.now().toString().slice(-6)}`,
-      transfer_type: 'Employee_Return_To_Warehouse',
+      transfer_type: 'Employee_Return_To_Warehouse' as const,
       emp_id: empId,
       product_id: productId,
       batch_id: batchId,
       qty,
       approved_by_emp_id: this.currentUser.emp_id,
       transfer_date: new Date().toISOString().split('T')[0],
-    });
+    };
+    this.stockTransfers.push(newTransfer);
 
     this.saveToStorage();
+    syncRecordToCloud('emp_stock', existing);
+    if (batch) syncRecordToCloud('product_batches', batch);
+    syncRecordToCloud('stock_transfers', newTransfer);
   }
 
   // POS BILLING & ORDERS (ATOMIC TRANSACTION)
@@ -1426,7 +1453,7 @@ class ERPStore {
     const resolvedCustomerAddress = params.customer_address || cust?.address || '';
 
     const newInvoice: Invoice = {
-      id: `inv-${Date.now()}`,
+      id: generateUUID(),
       invoice_ref: invoiceRef,
       order_status: params.order_status,
       stock_source: params.stock_source,
@@ -1463,17 +1490,20 @@ class ERPStore {
           );
           if (es) {
             es.qty = Math.max(0, es.qty - totalDeduct);
+            syncRecordToCloud('emp_stock', es);
           } else {
             // If employee sold from available batch, also deduct from batch if not in bag
             const batch = this.batches.find((b) => b.id === item.batch_id);
             if (batch) {
               batch.warehouse_qty = Math.max(0, batch.warehouse_qty - totalDeduct);
+              syncRecordToCloud('product_batches', batch);
             }
           }
         } else {
           const batch = this.batches.find((b) => b.id === item.batch_id);
           if (batch) {
             batch.warehouse_qty = Math.max(0, batch.warehouse_qty - totalDeduct);
+            syncRecordToCloud('product_batches', batch);
           }
         }
       });
@@ -1544,6 +1574,27 @@ class ERPStore {
       payment_method: newInvoice.payment_method,
       notes: newInvoice.notes,
     });
+
+    fullItems.forEach((item) => {
+      syncRecordToCloud('sales', {
+        id: generateUUID(),
+        invoice_id: newInvoice.id,
+        invoice_ref: newInvoice.invoice_ref,
+        date_time: newInvoice.date_time,
+        date_only: newInvoice.date_only,
+        emp_id: newInvoice.emp_id,
+        product_id: item.product_id,
+        batch_id: item.batch_id,
+        qty: item.qty,
+        bonus_qty: item.bonus_qty,
+        unit_cost_dp: item.unit_cost_dp,
+        unit_price: item.unit_price,
+        discount_percent: item.discount_percent,
+        total_price: item.total_price,
+        payment_status: newInvoice.payment_status,
+      });
+    });
+
     return newInvoice;
   }
 
@@ -1564,11 +1615,13 @@ class ERPStore {
         const batch = this.batches.find((b) => b.id === item.batch_id);
         if (batch) {
           batch.warehouse_qty = Math.max(0, batch.warehouse_qty - (item.qty + item.bonus_qty));
+          syncRecordToCloud('product_batches', batch);
         }
       });
     }
 
     this.saveToStorage();
+    syncRecordToCloud('invoices', inv);
   }
 
   // PURCHASES (GRN)
@@ -1611,9 +1664,10 @@ class ERPStore {
       if (batch) {
         batch.warehouse_qty += item.received_qty + item.free_bonus_qty;
         batch.exp_date = item.exp_date;
+        syncRecordToCloud('product_batches', batch);
       } else {
         batch = {
-          id: `batch-${Date.now()}-${Math.random()}`,
+          id: generateUUID(),
           product_id: item.product_id,
           batch_no: item.batch_no,
           mfg_date: item.mfg_date || null,
@@ -1625,6 +1679,7 @@ class ERPStore {
           is_active: true,
         };
         this.batches.push(batch);
+        syncRecordToCloud('product_batches', batch);
       }
 
       purchaseItems.push({
@@ -1744,9 +1799,10 @@ class ERPStore {
   public addExpense(exp: Omit<Expense, 'id' | 'created_at'>) {
     const newExp: Expense = {
       ...exp,
-      id: `exp-${Date.now()}`,
+      id: generateUUID(),
       created_at: new Date().toISOString(),
       entered_by_name: this.currentUser.name,
+      entered_by_emp_id: exp.entered_by_emp_id || this.currentUser.emp_id,
     };
     this.expenses.unshift(newExp);
     this.saveToStorage();
@@ -1778,23 +1834,27 @@ class ERPStore {
     const emp = this.employees.find((e) => e.emp_id === empId);
     const taDa = status === 'Present_Market_Duty' ? emp?.daily_ta_da || 350 : status === 'Present_Office' ? emp?.daily_ta_da || 300 : 0;
 
+    let recToSync;
     const existingIndex = this.attendance.findIndex((a) => a.emp_id === empId && a.work_date === targetDate);
     if (existingIndex >= 0) {
       this.attendance[existingIndex].status = status;
       this.attendance[existingIndex].ta_da_amount_earned = taDa;
+      recToSync = this.attendance[existingIndex];
     } else {
-      this.attendance.push({
-        id: `att-${Date.now()}-${empId}`,
+      recToSync = {
+        id: generateUUID(),
         emp_id: empId,
         work_date: targetDate,
         status,
         ta_da_amount_earned: taDa,
         marked_by_emp_id: this.currentUser.emp_id,
         employee_name: emp?.name,
-      });
+      };
+      this.attendance.push(recToSync);
     }
 
     this.saveToStorage();
+    syncRecordToCloud('attendance', recToSync);
   }
 
   // PAYROLL

@@ -26,6 +26,8 @@ import {
   Moon,
   Globe,
   HelpCircle,
+  Database,
+  RefreshCw,
 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useTheme } from '@/context/ThemeContext';
@@ -51,14 +53,26 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({ onCloseMobile }) => {
   const [profileName, setProfileName] = useState(user.name);
   const [profilePhoto, setProfilePhoto] = useState<string | null>(user.image_url || null);
   const [profilePhone, setProfilePhone] = useState(user.phone);
+  const [cloudStatus, setCloudStatus] = useState(erpStore.getCloudStatus());
+  const [isManualSyncing, setIsManualSyncing] = useState(false);
 
   useEffect(() => {
     const unsub = erpStore.subscribe(() => {
       setUser(erpStore.getCurrentUser());
       setMetrics(erpStore.getDashboardMetrics());
+      setCloudStatus(erpStore.getCloudStatus());
     });
     return unsub;
   }, []);
+
+  const handleManualSync = async () => {
+    setIsManualSyncing(true);
+    try {
+      await erpStore.syncWithCloud();
+    } finally {
+      setIsManualSyncing(false);
+    }
+  };
 
   const handleUpdateProfile = (e: React.FormEvent) => {
     e.preventDefault();
@@ -262,6 +276,32 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({ onCloseMobile }) => {
               )}
             </button>
           </div>
+        </div>
+
+        {/* Supabase Cloud Live Status */}
+        <div className="shrink-0 p-2.5 rounded-xl bg-[#15161c] border border-[#252628] text-xs space-y-1.5 mt-2">
+          <div className="flex items-center justify-between">
+            <span className="flex items-center space-x-1.5 text-zinc-300 font-medium">
+              <span className={`size-2 rounded-full ${cloudStatus.isConfigured ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.7)] animate-pulse' : 'bg-amber-400'}`} />
+              <span className="text-[11px] font-semibold text-zinc-200">
+                {cloudStatus.isConfigured ? (mode === 'bn' ? 'সুপাবেজ ক্লাউড' : 'Supabase Live') : (mode === 'bn' ? 'লোকাল মেমরি' : 'Local Memory')}
+              </span>
+            </span>
+            <button
+              type="button"
+              disabled={isManualSyncing}
+              onClick={handleManualSync}
+              className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 disabled:opacity-50 transition-colors flex items-center space-x-1"
+            >
+              <RefreshCw className={`size-2.5 ${isManualSyncing ? 'animate-spin' : ''}`} />
+              <span>{isManualSyncing ? (mode === 'bn' ? 'সিঙ্ক...' : 'Syncing...') : (mode === 'bn' ? 'সিঙ্ক' : 'Sync')}</span>
+            </button>
+          </div>
+          <p className="text-[10px] text-zinc-400 truncate">
+            {cloudStatus.isConfigured
+              ? (mode === 'bn' ? 'লাইভ ডাটাবেস সক্রিয়' : 'PostgreSQL Database Active')
+              : (mode === 'bn' ? 'অফলাইন ব্রাউজার ব্যাকআপ' : 'Browser Offline Backup')}
+          </p>
         </div>
 
         {/* Support Card */}

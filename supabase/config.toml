@@ -1,0 +1,15 @@
+# Supabase configuration for Senatix Wellness ERP
+project_id = "crszblgcsfrkwageuwig"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage"]
+
+[db]
+port = 54322
+
+[studio]
+enabled = true
+port = 54323
+
