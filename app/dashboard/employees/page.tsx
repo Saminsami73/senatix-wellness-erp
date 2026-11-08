@@ -1,0 +1,761 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import {
+  Users,
+  Plus,
+  Search,
+  Phone,
+  DollarSign,
+  PackagePlus,
+  FileSpreadsheet,
+  X,
+  RotateCcw,
+  Boxes,
+  CheckCircle,
+} from 'lucide-react';
+import { erpStore } from '@/lib/erpStore';
+import { useLanguage } from '@/context/LanguageContext';
+import { Employee, Product, ProductBatch, EmpStock } from '@/types/erp';
+import { SmartAvatar } from '@/components/ui/SmartAvatar';
+import { PhotoUploader } from '@/components/ui/PhotoUploader';
+import { exportSingleTableToExcel } from '@/lib/excelExport';
+
+export default function EmployeesDirectoryPage() {
+  const { mode, formatCurrency } = useLanguage();
+
+  const [employees, setEmployees] = useState<Employee[]>(erpStore.getEmployees());
+  const [products, setProducts] = useState<Product[]>(erpStore.getProducts());
+  const [batches, setBatches] = useState<ProductBatch[]>(erpStore.getProductBatches());
+  const [empStocks, setEmpStocks] = useState<EmpStock[]>(erpStore.getEmpStock());
+
+  const [selectedRole, setSelectedRole] = useState<string>('All');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Stock Issue Modal State
+  const [issueStaff, setIssueStaff] = useState<Employee | null>(null);
+  const [issueProductId, setIssueProductId] = useState('');
+  const [issueBatchId, setIssueBatchId] = useState('');
+  const [issueQty, setIssueQty] = useState(1);
+
+  // Stock Return Modal State
+  const [returnStaff, setReturnStaff] = useState<Employee | null>(null);
+  const [returnStockItem, setReturnStockItem] = useState<EmpStock | null>(null);
+  const [returnQty, setReturnQty] = useState(1);
+
+  // Cash Handover Modal State
+  const [handoverStaff, setHandoverStaff] = useState<Employee | null>(null);
+  const [handoverAmount, setHandoverAmount] = useState(0);
+
+  // Add Employee Modal State
+  const [showAddEmpModal, setShowAddEmpModal] = useState(false);
+  const [newEmpId, setNewEmpId] = useState('');
+  const [newName, setNewName] = useState('');
+  const [newPhone, setNewPhone] = useState('');
+  const [newRole, setNewRole] = useState<any>('sales_rep');
+  const [newDesignation, setNewDesignation] = useState('Sales Officer (MPO)');
+  const [newBaseSalary, setNewBaseSalary] = useState(25000);
+  const [newDailyTaDa, setNewDailyTaDa] = useState(350);
+  const [newCommission, setNewCommission] = useState(2.0);
+  const [newImage, setNewImage] = useState<string | null>(null);
+
+  const refreshState = () => {
+    setEmployees(erpStore.getEmployees());
+    setProducts(erpStore.getProducts());
+    setBatches(erpStore.getProductBatches());
+    setEmpStocks(erpStore.getEmpStock());
+  };
+
+  useEffect(() => {
+    const unsub = erpStore.subscribe(refreshState);
+    return unsub;
+  }, []);
+
+  const roles = [
+    { key: 'All', label: mode === 'bn' ? 'সকল কর্মী ও অফিসার' : 'All Staff' },
+    { key: 'executor', label: mode === 'bn' ? 'ম্যানেজিং ডিরেক্টর' : 'Managing Director' },
+    { key: 'super_admin', label: mode === 'bn' ? 'সুপার এডমিন' : 'Super Admin' },
+    { key: 'manager', label: mode === 'bn' ? 'ম্যানেজার' : 'Manager' },
+    { key: 'sales_rep', label: mode === 'bn' ? 'সেলস অফিসার' : 'Sales Representative' },
+    { key: 'store_keeper', label: mode === 'bn' ? 'স্টোর কিপার' : 'Store Keeper' },
+    { key: 'accountant', label: mode === 'bn' ? 'অ্যাকাউন্ট্যান্ট' : 'Accountant' },
+  ];
+
+  const filteredEmployees = employees.filter((e) => {
+    const matchesRole = selectedRole === 'All' || e.role === selectedRole;
+    const matchesSearch =
+      e.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      e.emp_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      e.phone.includes(searchQuery);
+    return matchesRole && matchesSearch;
+  });
+
+  const handleStockIssueSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!issueStaff || !issueProductId || !issueBatchId || issueQty <= 0) {
+      alert(mode === 'bn' ? 'সকল তথ্য সঠিকভাবে পূরণ করুন' : 'Please fill all fields');
+      return;
+    }
+
+    try {
+      erpStore.transferStockToEmployee(issueStaff.emp_id, issueProductId, issueBatchId, issueQty);
+      alert(
+        mode === 'bn'
+          ? `${issueStaff.name} এর কাছে ${issueQty} বক্স ওষুধ সফলভাবে বুঝিয়ে দেওয়া হয়েছে!`
+          : `Successfully issued ${issueQty} boxes to ${issueStaff.name}!`
+      );
+      setIssueStaff(null);
+      setIssueQty(1);
+      refreshState();
+    } catch (err: any) {
+      alert(err.message || 'Stock transfer failed');
+    }
+  };
+
+  const handleStockReturnSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!returnStaff || !returnStockItem || returnQty <= 0) return;
+
+    try {
+      erpStore.transferStockBackToWarehouse(
+        returnStaff.emp_id,
+        returnStockItem.product_id,
+        returnStockItem.batch_id,
+        returnQty
+      );
+      alert(
+        mode === 'bn'
+          ? `${returnQty} বক্স অবিক্রীত ওষুধ প্রধান গুদামে ফেরত গ্রহণ করা হয়েছে!`
+          : `Received ${returnQty} boxes back into warehouse!`
+      );
+      setReturnStaff(null);
+      setReturnStockItem(null);
+      setReturnQty(1);
+      refreshState();
+    } catch (err: any) {
+      alert(err.message || 'Return failed');
+    }
+  };
+
+  const handleCashHandoverSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!handoverStaff || handoverAmount <= 0) return;
+
+    handoverStaff.current_due_balance = Math.max(0, handoverStaff.current_due_balance - handoverAmount);
+
+    erpStore.getLedger().unshift({
+      id: `led-${Date.now()}`,
+      date_time: new Date().toISOString(),
+      date_only: new Date().toISOString().split('T')[0],
+      account_type: 'Employee',
+      emp_id: handoverStaff.emp_id,
+      payment_method: 'Cash',
+      description: `ফিল্ড কালেকশন ক্যাশ অফিসে জমা: ${handoverStaff.name}`,
+      debit: 0,
+      credit: handoverAmount,
+      balance: handoverStaff.current_due_balance,
+      party_name: handoverStaff.name,
+    });
+
+    alert(mode === 'bn' ? `৳ ${handoverAmount.toLocaleString()} টাকা অফিস ক্যাশে জমা হয়েছে!` : `Cash received: ৳${handoverAmount.toLocaleString()}`);
+    setHandoverStaff(null);
+    setHandoverAmount(0);
+    refreshState();
+  };
+
+  const handleSaveEmployee = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newEmpId || !newName || !newPhone) {
+      alert(mode === 'bn' ? 'আইডি, নাম ও ফোন নম্বর পূরণ করা আবশ্যক' : 'ID, name and phone are required');
+      return;
+    }
+
+    erpStore.addEmployee({
+      emp_id: newEmpId.toUpperCase(),
+      name: newName,
+      phone: newPhone,
+      role: newRole,
+      designation: newDesignation,
+      primary_market_id: null,
+      base_salary: newBaseSalary,
+      daily_ta_da: newDailyTaDa,
+      commission_percent: newCommission,
+      current_due_balance: 0,
+      salary_advance_balance: 0,
+      image_url: newImage,
+      is_active: true,
+    });
+
+    alert(mode === 'bn' ? 'নতুন কর্মী সফলভাবে যুক্ত হয়েছে!' : 'New staff member added successfully!');
+    setShowAddEmpModal(false);
+    setNewEmpId('');
+    setNewName('');
+    setNewPhone('');
+    setNewImage(null);
+    refreshState();
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-[#252628] gap-2">
+        <div className="flex items-center space-x-2.5">
+          <div className="size-9 rounded-xl bg-[#1b1c20] border border-[#252628] grid place-items-center text-[#86759f]">
+            <Users className="size-5" />
+          </div>
+          <div>
+            <h1 className="text-lg font-bold text-white">
+              {mode === 'bn' ? 'কর্মী তালিকা ও অবিক্রীত স্টক' : 'Staff Directory and In-Hand Stock'}
+            </h1>
+            <p className="text-xs text-zinc-400">
+              {mode === 'bn'
+                ? 'কর্মীদের ওষুধ বরাদ্দ দিন, অবিক্রীত স্টক ফেরত নিন ও নগদ কালেকশন হিসাব মেলান'
+                : 'Issue medicines to staff, take back unsold stock and collect field cash'}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => exportSingleTableToExcel(employees, 'Senatix_Employees_List')}
+            className="px-3.5 py-2 bg-[#1b1c20] hover:bg-[#252628] text-zinc-300 rounded-xl text-xs flex items-center space-x-1.5 border border-[#252628] transition-colors"
+          >
+            <FileSpreadsheet className="size-4 text-zinc-400" />
+            <span>{mode === 'bn' ? 'এক্সেল ডাউনলোড' : 'Export Excel'}</span>
+          </button>
+
+          <button
+            onClick={() => setShowAddEmpModal(true)}
+            className="px-4 py-2 bg-white hover:bg-zinc-100 text-[#0b0c10] font-bold text-xs rounded-xl flex items-center space-x-1.5 shadow-md active:scale-95 transition-all"
+          >
+            <Plus className="size-4" />
+            <span>{mode === 'bn' ? '+ নতুন কর্মী যোগ' : '+ Add Staff'}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Role Filter & Search */}
+      <div className="p-3 bg-[#1b1c20] rounded-xl border border-[#252628] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar">
+          {roles.map((r) => {
+            const count = r.key === 'All' ? employees.length : employees.filter((e) => e.role === r.key).length;
+            return (
+              <button
+                key={r.key}
+                onClick={() => setSelectedRole(r.key)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors flex items-center space-x-1.5 ${
+                  selectedRole === r.key
+                    ? 'bg-[#35383d] text-white shadow-sm'
+                    : 'bg-[#15161c] text-zinc-400 hover:text-white border border-[#252628]'
+                }`}
+              >
+                <span>{r.label}</span>
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-black/40">
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="relative w-full sm:w-64">
+          <Search className="size-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={mode === 'bn' ? 'নাম বা আইডি দিয়ে খুঁজুন...' : 'Search by name or ID...'}
+            className="w-full h-9 pl-9 pr-3 bg-[#0b0c10] border border-[#252628] focus:border-[#de9489] rounded-xl text-xs text-white outline-none placeholder-zinc-500"
+          />
+        </div>
+      </div>
+
+      {/* Employees Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        {filteredEmployees.map((emp) => {
+          const isDirector = emp.role === 'super_admin' || emp.role === 'executor';
+          const ring = isDirector ? 'border-amber-400' : 'border-emerald-500';
+
+          const staffStock = empStocks.filter((s) => s.emp_id === emp.emp_id && s.qty > 0);
+          const totalHeldBoxes = staffStock.reduce((acc, s) => acc + s.qty, 0);
+          const totalHeldValue = staffStock.reduce((acc, s) => acc + s.qty * (s.tp || 0), 0);
+
+          return (
+            <div
+              key={emp.emp_id}
+              className="p-4 bg-[#1b1c20] hover:bg-[#1f2026] rounded-xl border border-[#252628] flex flex-col justify-between transition-colors space-y-3"
+            >
+              <div className="space-y-2.5">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center space-x-3 overflow-hidden">
+                    <SmartAvatar
+                      imageUrl={emp.image_url}
+                      name={emp.name}
+                      size="lg"
+                      ringColor={ring}
+                    />
+                    <div>
+                      <h3 className="font-bold text-sm text-white line-clamp-1">{emp.name}</h3>
+                      <p className="text-xs text-zinc-400 font-medium">{emp.designation}</p>
+                      <span className="text-[10px] text-zinc-500 font-mono">ID: {emp.emp_id}</span>
+                    </div>
+                  </div>
+
+                  <a
+                    href={`tel:${emp.phone}`}
+                    className="size-9 rounded-full bg-[#1b1c20] hover:bg-[#252628] border border-[#252628] grid place-items-center text-zinc-300 hover:text-white shrink-0 transition-colors"
+                    title={mode === 'bn' ? 'কল করুন' : 'Call'}
+                  >
+                    <Phone className="size-4" />
+                  </a>
+                </div>
+
+                {/* In-Hand Unsold Stock Highlights */}
+                <div className="p-3 bg-[#0b0c10] rounded-xl border border-[#252628] space-y-2 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-zinc-400 flex items-center space-x-1">
+                      <Boxes className="size-3.5 text-emerald-400" />
+                      <span>{mode === 'bn' ? 'অবিক্রীত ওষুধ (হাতে মজুত):' : 'Unsold Stock Held:'}</span>
+                    </span>
+                    <span className="font-bold text-emerald-400 text-sm">
+                      {totalHeldBoxes} {mode === 'bn' ? 'বক্স' : 'boxes'}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-[11px] text-zinc-400">
+                    <span>{mode === 'bn' ? 'মজুত ওষুধের মোট মূল্য:' : 'Total Stock Value:'}</span>
+                    <span className="text-white font-medium">{formatCurrency(totalHeldValue)}</span>
+                  </div>
+
+                  {/* Held items preview */}
+                  {staffStock.length > 0 && (
+                    <div className="pt-1.5 border-t border-[#1f2026] flex flex-wrap gap-1">
+                      {staffStock.slice(0, 3).map((stk) => (
+                        <span
+                          key={stk.id}
+                          className="px-1.5 py-0.5 rounded text-[10px] bg-zinc-900 border border-zinc-800 text-zinc-300"
+                        >
+                          {stk.product_name}: <strong className="text-white">{stk.qty}</strong>
+                        </span>
+                      ))}
+                      {staffStock.length > 3 && (
+                        <span className="px-1.5 py-0.5 rounded text-[10px] text-zinc-500">
+                          +{staffStock.length - 3} {mode === 'bn' ? 'অন্যান্য' : 'more'}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Financial Summary */}
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="p-2.5 bg-[#0b0c10] border border-[#252628] rounded-xl">
+                    <div className="text-[10px] text-zinc-400">{mode === 'bn' ? 'মাসিক বেতন' : 'Salary'}</div>
+                    <div className="font-semibold text-white mt-0.5">
+                      {formatCurrency(emp.base_salary)}
+                    </div>
+                  </div>
+                  <div className="p-2.5 bg-[#0b0c10] border border-[#252628] rounded-xl">
+                    <div className="text-[10px] text-zinc-400">{mode === 'bn' ? 'হাতে থাকা ক্যাশ' : 'Cash in Hand'}</div>
+                    <div className="font-bold text-amber-400 mt-0.5">
+                      {formatCurrency(emp.current_due_balance)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 3 Operational Action Buttons */}
+              <div className="pt-2 border-t border-[#252628] grid grid-cols-3 gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setIssueStaff(emp)}
+                  className="py-2 bg-[#35383d] hover:bg-[#42464d] text-white rounded-xl text-[11px] font-semibold flex items-center justify-center space-x-1 shadow-sm transition-colors"
+                >
+                  <PackagePlus className="size-3 text-[#fae0d1]" />
+                  <span>{mode === 'bn' ? 'স্টক দিন' : 'Issue Stock'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const held = empStocks.filter((s) => s.emp_id === emp.emp_id && s.qty > 0);
+                    if (held.length === 0) {
+                      alert(
+                        mode === 'bn'
+                          ? 'এই কর্মীর কাছে বর্তমানে কোনো অবিক্রীত ওষুধ নেই।'
+                          : 'This employee has no unsold stock in hand.'
+                      );
+                      return;
+                    }
+                    setReturnStaff(emp);
+                    setReturnStockItem(held[0]);
+                    setReturnQty(Math.min(1, held[0].qty));
+                  }}
+                  className="py-2 bg-[#1b1c20] hover:bg-[#252628] border border-[#252628] text-amber-300 rounded-xl text-[11px] font-semibold flex items-center justify-center space-x-1 transition-colors"
+                >
+                  <RotateCcw className="size-3 text-amber-400" />
+                  <span>{mode === 'bn' ? 'ফেরত নিন' : 'Return Stock'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setHandoverStaff(emp);
+                    setHandoverAmount(emp.current_due_balance > 0 ? emp.current_due_balance : 0);
+                  }}
+                  className="py-2 bg-white hover:bg-zinc-100 text-[#0b0c10] rounded-xl text-[11px] font-bold flex items-center justify-center space-x-1 shadow-sm transition-all active:scale-[0.99]"
+                >
+                  <DollarSign className="size-3 text-[#0b0c10]" />
+                  <span>{mode === 'bn' ? 'ক্যাশ গ্রহণ' : 'Take Cash'}</span>
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Modal 1: Issue Stock from Warehouse to Staff */}
+      {issueStaff && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#1b1c20] border border-[#252628] rounded-xl max-w-sm w-full p-5 text-white shadow-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-[#252628]">
+              <h3 className="font-bold text-base">
+                {mode === 'bn' ? 'কর্মীকে ওষুধ হস্তান্তর' : 'Issue Stock to Staff'}
+              </h3>
+              <button onClick={() => setIssueStaff(null)} className="text-zinc-400 hover:text-white">
+                <X className="size-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleStockIssueSubmit} className="py-4 space-y-3 text-xs">
+              <div className="p-3 bg-[#0b0c10] rounded-xl border border-[#252628]">
+                <div className="text-white font-bold">{issueStaff.name} ({issueStaff.emp_id})</div>
+                <div className="text-zinc-400 mt-0.5">{issueStaff.designation}</div>
+              </div>
+
+              <div>
+                <label className="text-zinc-400 font-medium block mb-1">
+                  {mode === 'bn' ? 'ওষুধ নির্বাচন করুন *' : 'Select Medicine *'}
+                </label>
+                <select
+                  required
+                  value={issueProductId}
+                  onChange={(e) => {
+                    setIssueProductId(e.target.value);
+                    const b = batches.find((batch) => batch.product_id === e.target.value && batch.warehouse_qty > 0);
+                    if (b) setIssueBatchId(b.id);
+                  }}
+                  className="w-full h-10 px-3 bg-[#0b0c10] border border-[#252628] focus:border-[#de9489] rounded-xl text-xs text-white outline-none"
+                >
+                  <option value="">{mode === 'bn' ? '-- ওষুধ নির্বাচন করুন --' : '-- Select Medicine --'}</option>
+                  {products.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} ({p.pack_size}) - গুদাম মজুত: {p.stock} বক্স
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-zinc-400 font-medium block mb-1">
+                  {mode === 'bn' ? 'ব্যাচ নম্বর *' : 'Batch Number *'}
+                </label>
+                <select
+                  required
+                  value={issueBatchId}
+                  onChange={(e) => setIssueBatchId(e.target.value)}
+                  className="w-full h-10 px-3 bg-[#0b0c10] border border-[#252628] focus:border-[#de9489] rounded-xl text-xs text-white outline-none"
+                >
+                  <option value="">{mode === 'bn' ? '-- ব্যাচ নির্বাচন করুন --' : '-- Select Batch --'}</option>
+                  {batches
+                    .filter((b) => b.product_id === issueProductId && b.warehouse_qty > 0)
+                    .map((b) => (
+                      <option key={b.id} value={b.id}>
+                        {b.batch_no} (মজুত: {b.warehouse_qty} বক্স, মেয়াদ: {b.exp_date})
+                      </option>
+                    ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-zinc-400 font-medium block mb-1">
+                  {mode === 'bn' ? 'হস্তান্তর বক্স সংখ্যা *' : 'Number of Boxes to Issue *'}
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  required
+                  value={issueQty}
+                  onChange={(e) => setIssueQty(parseInt(e.target.value) || 1)}
+                  className="w-full h-10 px-3 bg-[#0b0c10] border border-[#252628] focus:border-[#de9489] rounded-xl text-sm font-bold text-white outline-none"
+                />
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  className="w-full py-2.5 bg-white hover:bg-zinc-100 text-[#0b0c10] font-bold text-sm rounded-xl transition-all shadow-md active:scale-95"
+                >
+                  {mode === 'bn' ? 'ওষুধ হস্তান্তর নিশ্চিত করুন' : 'Confirm Issue to Staff'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal 2: Return Unsold Stock Back to Warehouse */}
+      {returnStaff && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#1b1c20] border border-[#252628] rounded-xl max-w-sm w-full p-5 text-white shadow-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-[#252628]">
+              <h3 className="font-bold text-base">
+                {mode === 'bn' ? 'অবিক্রীত ওষুধ গুদামে ফেরত গ্রহণ' : 'Return Unsold Stock to Warehouse'}
+              </h3>
+              <button onClick={() => setReturnStaff(null)} className="text-zinc-400 hover:text-white">
+                <X className="size-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleStockReturnSubmit} className="py-4 space-y-3 text-xs">
+              <div className="p-3 bg-[#0b0c10] rounded-xl border border-[#252628]">
+                <div className="text-white font-bold">{returnStaff.name} ({returnStaff.emp_id})</div>
+                <div className="text-zinc-400 mt-0.5">{mode === 'bn' ? 'কর্মীর কাছে থাকা অবিক্রীত ওষুধ তালিকা' : 'In-hand unsold items'}</div>
+              </div>
+
+              <div>
+                <label className="text-zinc-400 font-medium block mb-1">
+                  {mode === 'bn' ? 'কোন ওষুধটি ফেরত নেবেন? *' : 'Select Item to Return *'}
+                </label>
+                <select
+                  required
+                  value={returnStockItem?.id || ''}
+                  onChange={(e) => {
+                    const found = empStocks.find((s) => s.id === e.target.value);
+                    if (found) {
+                      setReturnStockItem(found);
+                      setReturnQty(Math.min(1, found.qty));
+                    }
+                  }}
+                  className="w-full h-10 px-3 bg-[#0b0c10] border border-[#252628] focus:border-[#de9489] rounded-xl text-xs text-white outline-none"
+                >
+                  {empStocks
+                    .filter((s) => s.emp_id === returnStaff.emp_id && s.qty > 0)
+                    .map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.product_name} (ব্যাচ: {s.batch_no || s.batch_id}) - হাতে আছে: {s.qty} বক্স
+                      </option>
+                    ))}
+                </select>
+              </div>
+
+              {returnStockItem && (
+                <div>
+                  <label className="text-zinc-400 font-medium block mb-1">
+                    {mode === 'bn' ? 'কত বক্স গুদামে ফেরত নেবেন? *' : 'Quantity to Return *'}
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max={returnStockItem.qty}
+                    required
+                    value={returnQty}
+                    onChange={(e) => setReturnQty(parseInt(e.target.value) || 1)}
+                    className="w-full h-10 px-3 bg-[#0b0c10] border border-[#252628] focus:border-[#de9489] rounded-xl text-sm font-bold text-white outline-none"
+                  />
+                  <span className="text-[10px] text-zinc-500 mt-0.5 block">
+                    {mode === 'bn' ? `সর্বোচ্চ ফেরতযোগ্য: ${returnStockItem.qty} বক্স` : `Max returnable: ${returnStockItem.qty} boxes`}
+                  </span>
+                </div>
+              )}
+
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  className="w-full py-2.5 bg-white hover:bg-zinc-100 text-[#0b0c10] font-bold text-sm rounded-xl transition-all shadow-md active:scale-95"
+                >
+                  {mode === 'bn' ? 'গুদামে ফেরত গ্রহণ নিশ্চিত করুন' : 'Confirm Return to Warehouse'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal 3: Cash Handover Modal */}
+      {handoverStaff && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#1b1c20] border border-[#252628] rounded-xl max-w-sm w-full p-5 text-white shadow-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-[#252628]">
+              <h3 className="font-bold text-base">
+                {mode === 'bn' ? 'ক্যাশ জমা গ্রহণ' : 'Collect Cash from Staff'}
+              </h3>
+              <button onClick={() => setHandoverStaff(null)} className="text-zinc-400 hover:text-white">
+                <X className="size-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCashHandoverSubmit} className="py-4 space-y-3 text-xs">
+              <div className="p-3 bg-[#0b0c10] rounded-xl border border-[#252628]">
+                <div className="text-white font-bold">{handoverStaff.name}</div>
+                <div className="text-zinc-400 mt-0.5">
+                  {mode === 'bn' ? 'বর্তমান ফিল্ড ক্যাশ:' : 'Cash in Hand:'}{' '}
+                  <strong className="text-amber-400">{formatCurrency(handoverStaff.current_due_balance)}</strong>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-zinc-400 font-medium block mb-1">
+                  {mode === 'bn' ? 'অফিসে জমা টাকার পরিমাণ (টাকা) *' : 'Amount Received (Tk) *'}
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  required
+                  value={handoverAmount}
+                  onChange={(e) => setHandoverAmount(parseFloat(e.target.value) || 0)}
+                  className="w-full h-11 px-3 bg-[#0b0c10] border border-[#252628] focus:border-[#de9489] rounded-xl text-base font-bold text-white outline-none"
+                />
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  className="w-full py-2.5 bg-white hover:bg-zinc-100 text-[#0b0c10] font-bold text-sm rounded-xl transition-all shadow-md active:scale-95"
+                >
+                  {mode === 'bn' ? 'ক্যাশ জমা নিশ্চিত করুন' : 'Confirm Cash Handover'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal 4: Add Employee Modal */}
+      {showAddEmpModal && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#1b1c20] border border-[#252628] rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto no-scrollbar p-5 text-white shadow-2xl">
+            <div className="flex items-center justify-between pb-3 border-b border-[#252628]">
+              <h3 className="font-bold text-base">
+                {mode === 'bn' ? 'নতুন কর্মী যুক্ত করুন' : 'Add New Staff Member'}
+              </h3>
+              <button onClick={() => setShowAddEmpModal(false)} className="text-zinc-400 hover:text-white">
+                <X className="size-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEmployee} className="py-4 space-y-4 text-xs">
+              {/* Photo Upload */}
+              <div className="flex justify-center">
+                <PhotoUploader
+                  currentImageUrl={newImage}
+                  onImageSelected={(b64) => setNewImage(b64)}
+                  label={mode === 'bn' ? 'কর্মীর ছবি যোগ করুন' : 'Upload Staff Photo'}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-zinc-400 font-medium block mb-1">
+                    {mode === 'bn' ? 'কর্মীর আইডি *' : 'Employee ID *'}
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={newEmpId}
+                    onChange={(e) => setNewEmpId(e.target.value)}
+                    placeholder="EMP-006"
+                    className="w-full h-10 px-3 bg-[#0b0c10] border border-[#252628] focus:border-[#de9489] rounded-xl text-xs text-white outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-zinc-400 font-medium block mb-1">
+                    {mode === 'bn' ? 'পূর্ণ নাম *' : 'Full Name *'}
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    placeholder={mode === 'bn' ? 'কর্মীর নাম' : 'Staff Name'}
+                    className="w-full h-10 px-3 bg-[#0b0c10] border border-[#252628] focus:border-[#de9489] rounded-xl text-xs text-white outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-zinc-400 font-medium block mb-1">
+                    {mode === 'bn' ? 'মোবাইল নম্বর *' : 'Mobile Phone *'}
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={newPhone}
+                    onChange={(e) => setNewPhone(e.target.value)}
+                    placeholder="017xxxxxxxx"
+                    className="w-full h-10 px-3 bg-[#0b0c10] border border-[#252628] focus:border-[#de9489] rounded-xl text-xs text-white outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-zinc-400 font-medium block mb-1">
+                    {mode === 'bn' ? 'পদবি ও পদমর্যাদা' : 'Designation'}
+                  </label>
+                  <input
+                    type="text"
+                    value={newDesignation}
+                    onChange={(e) => setNewDesignation(e.target.value)}
+                    placeholder={mode === 'bn' ? 'মেডিকেল প্রমোশন অফিসার' : 'Medical Promotion Officer'}
+                    className="w-full h-10 px-3 bg-[#0b0c10] border border-[#252628] focus:border-[#de9489] rounded-xl text-xs text-white outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-zinc-400 font-medium block mb-1">
+                    {mode === 'bn' ? 'সিস্টেম দায়িত্ব' : 'Role in System'}
+                  </label>
+                  <select
+                    value={newRole}
+                    onChange={(e) => setNewRole(e.target.value)}
+                    className="w-full h-10 px-3 bg-[#0b0c10] border border-[#252628] focus:border-[#de9489] rounded-xl text-xs text-white outline-none"
+                  >
+                    <option value="sales_rep">{mode === 'bn' ? 'সেলস অফিসার' : 'Sales Officer'}</option>
+                    <option value="manager">{mode === 'bn' ? 'ম্যানেজার' : 'Manager'}</option>
+                    <option value="store_keeper">{mode === 'bn' ? 'স্টোর কিপার' : 'Store Keeper'}</option>
+                    <option value="accountant">{mode === 'bn' ? 'অ্যাকাউন্ট্যান্ট' : 'Accountant'}</option>
+                    <option value="executor">{mode === 'bn' ? 'ম্যানেজিং ডিরেক্টর' : 'Managing Director'}</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-zinc-400 font-medium block mb-1">
+                    {mode === 'bn' ? 'মূল মাসিক বেতন (টাকা)' : 'Monthly Base Salary (Tk)'}
+                  </label>
+                  <input
+                    type="number"
+                    value={newBaseSalary}
+                    onChange={(e) => setNewBaseSalary(parseFloat(e.target.value) || 0)}
+                    className="w-full h-10 px-3 bg-[#0b0c10] border border-[#252628] focus:border-[#de9489] rounded-xl text-xs text-white outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  className="w-full py-2.5 bg-white hover:bg-zinc-100 text-[#0b0c10] font-bold text-sm rounded-xl transition-all shadow-md active:scale-95"
+                >
+                  {mode === 'bn' ? 'কর্মী সংরক্ষণ করুন' : 'Save Staff Member'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

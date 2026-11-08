@@ -1,0 +1,174 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-obsidian: #0b0c10;
+  --bg-card: #1b1c20;
+  --border-card: #252628;
+}
+
+body {
+  font-family: 'Inter', 'Hind Siliguri', sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Gradients from UI_template/style.scss */
+.sidebar-right-selected {
+  background: linear-gradient(222.44deg, rgba(219, 171, 174, 0) 0%, rgba(219, 171, 174, 0) 40.12%, #EB9197 95.91%),
+              linear-gradient(316.82deg, #DFA896 -3.39%, #B17ECE 100%);
+  color: #1a1a1a;
+}
+
+.notification-selected {
+  background: linear-gradient(316.82deg, #FFA082 -3.39%, #BA5DEF 100%);
+}
+
+/* Custom Scrollbar for smooth scrolling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #111217;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2c35;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3e4250;
+}
+
+/* Glassmorphism utility for login page */
+.glass-panel {
+  background-color: rgba(255, 255, 255, 0.13);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 40px rgba(8, 7, 16, 0.6);
+}
+
+/* Hide scrollbars when desired */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ==========================================================================
+   LIGHT MODE OVERRIDES - High contrast, accessible for older non-tech owners
+   ========================================================================== */
+html.light {
+  color-scheme: light;
+}
+
+html.light body {
+  background-color: #f8fafc !important;
+  color: #1e293b !important;
+}
+
+html.light ::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+html.light ::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+}
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Background mappings */
+html.light .bg-\[\#0b0c10\],
+html.light .bg-\[\#080710\] {
+  background-color: #f8fafc !important;
+}
+
+html.light .bg-\[\#15161c\],
+html.light .bg-\[\#1b1c20\] {
+  background-color: #ffffff !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+}
+
+html.light .bg-\[\#252628\] {
+  background-color: #f1f5f9 !important;
+}
+
+html.light .bg-\[\#35383d\] {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+html.light .bg-zinc-900 {
+  background-color: #f8fafc !important;
+}
+
+html.light .bg-zinc-800 {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+html.light .bg-\[\#28292d\] {
+  background-color: #e2e8f0 !important;
+}
+
+/* Border mappings */
+html.light .border-\[\#252628\],
+html.light .border-zinc-800,
+html.light .border-zinc-700 {
+  border-color: #e2e8f0 !important;
+}
+
+/* Text mappings for crystal clear readability */
+html.light .text-white,
+html.light .text-zinc-100 {
+  color: #0f172a !important;
+}
+
+html.light .text-zinc-200,
+html.light .text-zinc-300,
+html.light .text-\[\#c0c4cd\] {
+  color: #334155 !important;
+}
+
+html.light .text-zinc-400,
+html.light .text-zinc-500,
+html.light .text-\[\#7a7d82\],
+html.light .text-\[\#606165\],
+html.light .text-\[\#6e7176\] {
+  color: #64748b !important;
+}
+
+/* Hover states */
+html.light .hover\:bg-\[\#1b1c20\]:hover,
+html.light .hover\:bg-\[\#252628\]:hover,
+html.light .hover\:bg-zinc-800:hover {
+  background-color: #f1f5f9 !important;
+}
+
+html.light .hover\:bg-\[\#43474d\]:hover {
+  background-color: #e2e8f0 !important;
+}
+
+html.light .hover\:text-white:hover {
+  color: #0f172a !important;
+}
+
+/* Form inputs & tables in light mode */
+html.light input,
+html.light select,
+html.light textarea {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: #94a3b8 !important;
+}

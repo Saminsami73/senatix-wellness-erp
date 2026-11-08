@@ -1,0 +1,427 @@
+================================================================================
+SENATIX WELLNESS - COMPLETE A-Z MEDICINE DISTRIBUTION & ERP MASTER SPECIFICATION
+Target Users: 50+ Non-Technical Staff (Admins, Executors, Managers, Warehouse, Field Sales)
+UI/UX Standard: Strict 60 FPS, Daylight-First Light UI, 100% Responsive (320px to 4K)
+Media Standard: Optional Compressed WebP Images for All Products & All People
+Architecture: 100% Free-Tier Optimized (Next.js 14 App Router + Supabase + Vercel)
+Upgraded From: AK Pharma Distribution Management System Baseline
+================================================================================
+
+1. STRICT 60 FPS PERFORMANCE, LIGHT UI & RESPONSIVE ENGINEERING RULES
+--------------------------------------------------------------------------------
+A. STRICT 60 FPS RENDERING RULES (MANDATORY FOR ALL COMPONENTS):
+   1. NO Heavy CSS Blurs on Scrolling Lists:
+      - Do NOT use `backdrop-blur-md` or `backdrop-filter` on repeating cards, table rows, or mobile drawers (causes severe GPU lag on budget smartphones).
+      - Use clean, solid Light Mode surfaces: Page Background `bg-slate-50` (#F8FAFC), Card Surface `bg-white` (#FFFFFF), Crisp Border `border border-slate-200` (#E2E8F0), Subtle Elevation `shadow-sm`.
+   2. GPU-Accelerated Micro-Interactions Only:
+      - Only animate `transform` (`translate3d`, `scale`) and `opacity`.
+      - Transition duration must be fast and snappy: `transition-all duration-150 ease-out` (`150ms`).
+      - Active tap feedback on all buttons: `active:scale-[0.98]` so users feel an instant physical response on touchscreens.
+      - Remove continuous infinite animations (`animate-pulse`) except on skeleton loading placeholders.
+   3. Zero Layout Shift (CLS = 0) for Optional Images:
+      - Every product photo and user avatar MUST sit inside a fixed-dimension square or circle container (`w-11 h-11` or `w-14 h-14 aspect-square shrink-0 overflow-hidden`) so the screen never jumps while images load.
+      - Always use `loading="lazy"` and `decoding="async"` on `<img>` tags.
+   4. Instant List Filtering & Pagination (No DOM Bloat):
+      - Never render more than 30 rows/cards on the screen at once. Use client-side pagination (`25 items per page`) or virtualized lists (`useMemo` + debounced search input at `120ms`).
+      - Switching tabs or typing in search boxes must respond in `<16ms` (60 FPS).
+
+B. UNIVERSAL RESPONSIVE LAYOUT ARCHITECTURE (ALL SCREEN SIZES):
+   1. Small & Standard Mobile Phones (`320px` to `767px` - `< md`):
+      - Navigation: Fixed Top Header (`h-14`) showing Senatix Logo, Current Page Title, and Logged-in User's Circular Photo/Avatar + Fixed Bottom Navigation Bar (`h-16`) with 5 large tap targets (`Home`, `Make Bill`, `Stock`, `Money Book`, `More Menu`).
+      - Data Display: Tables automatically transform into clean **Mobile Info Cards** (`md:hidden`) with big readable text, photo thumbnail on the left, price/stock badge on the right, and full-width action buttons at the bottom. Zero horizontal scrolling required.
+      - Billing Screen on Mobile: Medicine list fills the screen; a **Sticky Bottom Cart Bar** shows `"Items in Bill: X | Total: ৳ Y,YYY [Review & Confirm ->]"` which opens a smooth slide-up drawer.
+      - Input Font Size Rule: All `<input>`, `<select>`, and `<textarea>` elements MUST have `text-base` (`16px` minimum) so iOS/Android browsers never auto-zoom the screen when a worker taps an input box.
+   2. Tablets (`768px` to `1023px` - `md` to `lg`):
+      - Navigation: Left Collapsible Icon+Label Sidebar (`w-20` collapsed, `w-60` expanded).
+      - Layouts: 2-column summary grids (`grid-cols-2`), compact tables with touch-friendly `h-11` buttons.
+   3. Office Laptops & Desktops (`1024px` to `1920px+` - `lg` & `xl`):
+      - Navigation: Permanent Left Sidebar (`w-64`) with Senatix Branding, User Profile Card (Photo + Name + Role Badge), and instant route links.
+      - Layouts: 4-column KPI cards (`grid-cols-4`), full multi-column data tables (`hidden md:table`) with sticky table headers, and **Split-Screen POS Billing** (60% Left: Searchable Medicine Grid with Photos; 40% Right: Sticky Live Invoice Cart & Payment Calculator).
+
+C. PLAIN-ENGLISH LABELS (FOR 50+ NON-TECHNICAL STAFF):
+   - "Debit / Receivable"        -> "New Bill / Due Added"
+   - "Credit / Payment"          -> "Money Received (Cash/bKash/Bank)"
+   - "Current Due Balance"       -> "Total Money Owed (Baki)"
+   - "GRN / Procurement"         -> "Receive Stock from Factory"
+   - "Trade Price (TP)"          -> "Pharmacy Selling Price"
+   - "Distributor Price (DP)"    -> "Factory Buying Cost"
+   - "MRP"                       -> "Printed Box Price (MRP)"
+   - "Bonus Scheme (10+1)"       -> "Free Bonus Boxes Given"
+   - "Quarantine Stock"          -> "Damaged or Expired Medicine"
+   - "TA / DA"                   -> "Daily Travel & Food Allowance"
+
+================================================================================
+2. OPTIONAL IMAGE SYSTEM & FREE-TIER STORAGE ARCHITECTURE
+================================================================================
+Every entity in the software supports an **OPTIONAL** photo (`image_url TEXT NULLABLE`).
+
+A. WHO & WHAT CAN HAVE AN IMAGE (ALL OPTIONAL):
+   1. Products / Medicines (`products.image_url`): Photo of the medicine box, strip, or bottle so staff and delivery men can visually recognize the product immediately.
+   2. Executors / Super Admins / Managers / Accountants / Store Keepers / Field Staff (`employees.image_url` & `profiles.avatar_url`): Profile photo of every person in the company (50+ staff + owners/executors).
+   3. Pharmacies / Customers (`customers.image_url`): Optional photo of the pharmacy signboard or shop owner.
+   4. Suppliers / Factories (`suppliers.image_url`): Optional factory/brand logo.
+   5. Company Branding (`company_settings.logo_url`): Senatix Wellness logo for the top header and printed PDF invoices.
+
+B. CLIENT-SIDE AUTO-COMPRESSION ENGINE (`lib/imageUpload.ts`):
+   To keep the Supabase Free Tier (1 GB limit) running forever at 60 FPS:
+   - Before uploading any selected photo (`JPG`, `PNG`, `HEIC`, `WebP`), a browser-side `<canvas>` helper function automatically:
+     1. Crops/resizes the image to max `400x400px` (maintaining aspect ratio).
+     2. Converts and compresses the image to `image/webp` at `0.75` quality (resulting file size: **15 KB to 35 KB**).
+     3. Uploads the tiny `.webp` file to the public Supabase Storage bucket `senatix-media` under folder paths:
+        - `products/{product_id}.webp`
+        - `staff/{emp_id}.webp`
+        - `customers/{customer_id}.webp`
+        - `suppliers/{supplier_id}.webp`
+     4. Saves the public URL in the table's `image_url` column with `cacheControl: '31536000'` (1-year browser cache).
+   - Includes a `"Remove Photo"` button if the user wants to clear the photo back to `NULL`.
+
+C. SMART VISUAL FALLBACK COMPONENT (`components/ui/SmartAvatar.tsx`):
+   - If `image_url` is present: Renders the compressed WebP image inside a rounded container (`rounded-xl` for products, `rounded-full` for people).
+   - If `image_url` is `NULL` (not uploaded):
+     * For People (Admin, Executor, Staff, Customer Owner): Renders a crisp pastel circle with their 2-letter Initials (e.g., `SA` for Samin, `AR` for Executor/Director).
+     * For Products: Renders a color-coded category icon (`Pill` for Tablet/Capsule, `FlaskConical` for Syrup, `Syringe` for Injection, `Package` for Supplement/Box).
+
+================================================================================
+3. COMPLETE DATABASE SCHEMA (database/schema.sql - 18 TABLES + STORAGE)
+================================================================================
+Enable UUID extension: `CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`
+
+--- SUPABASE STORAGE BUCKET ---
+- Bucket Name: `senatix-media` (Public Bucket = `true`, File Size Limit = `500KB`, Allowed MIME Types = `['image/webp', 'image/jpeg', 'image/png']`).
+- Storage RLS Policy: `SELECT` allowed for everyone; `INSERT / UPDATE / DELETE` allowed for authenticated users.
+
+--- TABLE 1: markets (Sales Territories / Routes / Beats) ---
+- id: UUID PK DEFAULT uuid_generate_v4()
+- market_code: TEXT UNIQUE NOT NULL (e.g., 'MKT-01')
+- name: TEXT UNIQUE NOT NULL (e.g., 'Mirpur-10 Market')
+- area_zone: TEXT NOT NULL (e.g., 'Dhaka North')
+- delivery_days: TEXT DEFAULT 'Everyday'
+- is_active: BOOLEAN DEFAULT true
+- created_at: TIMESTAMPTZ DEFAULT now()
+
+--- TABLE 2: employees (Master Directory for All 50+ Staff, Managers & Executors/Admins) ---
+- emp_id: TEXT PK (e.g., 'ADM-01', 'EXE-01', 'EMP-001' - Used for login & ID badge)
+- name: TEXT NOT NULL
+- image_url: TEXT NULLABLE (Optional profile photo URL for Admin, Executor, or Staff)
+- phone: TEXT UNIQUE NOT NULL
+- designation: TEXT NOT NULL ('Managing Director / Executor', 'Super Admin', 'General Manager', 'Accountant', 'Store Keeper', 'Sales Officer (MPO)', 'Delivery Man')
+- role: TEXT CHECK (role IN ('super_admin', 'executor', 'manager', 'accountant', 'store_keeper', 'sales_rep')) DEFAULT 'sales_rep'
+- nid_number: TEXT
+- joining_date: DATE DEFAULT CURRENT_DATE
+- primary_market_id: UUID FK REFERENCES markets(id) ON DELETE SET NULL
+- base_salary: DECIMAL(10,2) DEFAULT 0.00
+- daily_ta_da: DECIMAL(8,2) DEFAULT 0.00 (Daily travel & food allowance)
+- commission_percent: DECIMAL(5,2) DEFAULT 0.00 (% bonus on collected sales)
+- current_due_balance: DECIMAL(12,2) DEFAULT 0.00 (Field collection/stock liability)
+- salary_advance_balance: DECIMAL(10,2) DEFAULT 0.00
+- is_active: BOOLEAN DEFAULT true
+- created_at: TIMESTAMPTZ DEFAULT now()
+
+--- TABLE 3: profiles (Links Supabase Auth Users to Employees/Executors/Admins) ---
+- id: UUID PK REFERENCES auth.users(id) ON DELETE CASCADE
+- emp_id: TEXT UNIQUE REFERENCES employees(emp_id) ON DELETE CASCADE
+- full_name: TEXT NOT NULL
+- avatar_url: TEXT NULLABLE (Synced with employees.image_url)
+- login_identifier: TEXT UNIQUE NOT NULL
+- role: TEXT CHECK (role IN ('super_admin', 'executor', 'manager', 'accountant', 'store_keeper', 'sales_rep')) NOT NULL
+- is_active: BOOLEAN DEFAULT true
+- created_at: TIMESTAMPTZ DEFAULT now()
+
+--- TABLE 4: customers (Pharmacies / Chemists / Clinics) ---
+- id: UUID PK DEFAULT uuid_generate_v4()
+- customer_code: TEXT UNIQUE NOT NULL (e.g., 'PHARM-1001')
+- shop_name: TEXT NOT NULL
+- owner_name: TEXT
+- image_url: TEXT NULLABLE (Optional photo of pharmacy signboard or owner)
+- phone: TEXT NOT NULL
+- address: TEXT
+- drug_license_no: TEXT
+- market_id: UUID FK REFERENCES markets(id) ON DELETE RESTRICT
+- assigned_emp_id: TEXT FK REFERENCES employees(emp_id) ON DELETE SET NULL
+- credit_limit: DECIMAL(12,2) DEFAULT 50000.00
+- current_due_balance: DECIMAL(12,2) DEFAULT 0.00 (Total unpaid Baki)
+- is_active: BOOLEAN DEFAULT true
+- created_at: TIMESTAMPTZ DEFAULT now()
+
+--- TABLE 5: suppliers (Medicine Manufacturers / Principals / Factories) ---
+- id: UUID PK DEFAULT uuid_generate_v4()
+- name: TEXT UNIQUE NOT NULL
+- image_url: TEXT NULLABLE (Optional supplier/factory logo)
+- contact_person: TEXT
+- phone: TEXT
+- address: TEXT
+- payable_balance: DECIMAL(12,2) DEFAULT 0.00
+- is_active: BOOLEAN DEFAULT true
+- created_at: TIMESTAMPTZ DEFAULT now()
+
+--- TABLE 6: products (Master Medicine & Wellness Catalog with Optional Photo) ---
+- id: UUID PK DEFAULT uuid_generate_v4()
+- sku_code: TEXT UNIQUE (e.g., 'MED-001')
+- name: TEXT UNIQUE NOT NULL (Brand Name)
+- image_url: TEXT NULLABLE (Optional product box/bottle photo URL)
+- generic_name: TEXT (e.g., 'Calcium + Vitamin D3')
+- category: TEXT NOT NULL DEFAULT 'Tablet' ('Tablet', 'Capsule', 'Syrup', 'Suspension', 'Injection', 'Cream/Ointment', 'Sachet/Powder', 'Supplement', 'Drop')
+- strength: TEXT (e.g., '500mg')
+- pack_size: TEXT NOT NULL (e.g., 'Box of 30 Tablets')
+- supplier_id: UUID FK REFERENCES suppliers(id) ON DELETE SET NULL
+- stock: INTEGER DEFAULT 0 (Auto-synced sum of valid batch stocks)
+- low_stock_alert_level: INTEGER DEFAULT 50
+- cost_price_dp: DECIMAL(10,2) NOT NULL DEFAULT 0.00 (Factory Buying Cost)
+- trade_price_tp: DECIMAL(10,2) NOT NULL DEFAULT 0.00 (Pharmacy Selling Price)
+- mrp: DECIMAL(10,2) NOT NULL DEFAULT 0.00 (Printed Box Price)
+- bonus_buy_qty: INTEGER DEFAULT 0 (e.g., 10)
+- bonus_free_qty: INTEGER DEFAULT 0 (e.g., 1)
+- is_active: BOOLEAN DEFAULT true
+- created_at: TIMESTAMPTZ DEFAULT now()
+
+--- TABLE 7: product_batches (Batch Number & Expiry Date Tracker) ---
+- id: UUID PK DEFAULT uuid_generate_v4()
+- product_id: UUID FK REFERENCES products(id) ON DELETE RESTRICT
+- batch_no: TEXT NOT NULL
+- mfg_date: DATE
+- exp_date: DATE NOT NULL
+- cost_price_dp: DECIMAL(10,2) NOT NULL
+- trade_price_tp: DECIMAL(10,2) NOT NULL
+- mrp: DECIMAL(10,2) NOT NULL
+- warehouse_qty: INTEGER DEFAULT 0 CHECK (warehouse_qty >= 0)
+- is_active: BOOLEAN DEFAULT true
+- created_at: TIMESTAMPTZ DEFAULT now()
+- UNIQUE(product_id, batch_no)
+
+--- TABLE 8: purchases (Stock Received from Factory - Header) ---
+- id: UUID PK DEFAULT uuid_generate_v4()
+- receive_ref: TEXT UNIQUE NOT NULL (e.g., 'RCV-20261103-001')
+- supplier_id: UUID FK REFERENCES suppliers(id) ON DELETE RESTRICT
+- factory_challan_no: TEXT
+- receive_date: DATE DEFAULT CURRENT_DATE
+- total_cost_amount: DECIMAL(12,2) NOT NULL
+- paid_amount: DECIMAL(12,2) DEFAULT 0.00
+- due_amount: DECIMAL(12,2) DEFAULT 0.00
+- notes: TEXT
+- created_by_emp_id: TEXT FK REFERENCES employees(emp_id)
+- created_at: TIMESTAMPTZ DEFAULT now()
+
+--- TABLE 9: purchase_items (Stock Received from Factory - Medicine Lines) ---
+- id: UUID PK DEFAULT uuid_generate_v4()
+- purchase_id: UUID FK REFERENCES purchases(id) ON DELETE CASCADE
+- product_id: UUID FK REFERENCES products(id) ON DELETE RESTRICT
+- batch_id: UUID FK REFERENCES product_batches(id) ON DELETE RESTRICT
+- received_qty: INTEGER NOT NULL CHECK (received_qty > 0)
+- free_bonus_qty: INTEGER DEFAULT 0
+- unit_cost_dp: DECIMAL(10,2) NOT NULL
+- line_total_cost: DECIMAL(12,2) NOT NULL
+
+--- TABLE 10: emp_stock (Medicine Stock Currently Carried by Field Staff) ---
+- id: UUID PK DEFAULT uuid_generate_v4()
+- emp_id: TEXT FK REFERENCES employees(emp_id) ON DELETE RESTRICT
+- product_id: UUID FK REFERENCES products(id) ON DELETE RESTRICT
+- batch_id: UUID FK REFERENCES product_batches(id) ON DELETE RESTRICT
+- qty: INTEGER DEFAULT 0 CHECK (qty >= 0)
+- updated_at: TIMESTAMPTZ DEFAULT now()
+- UNIQUE(emp_id, product_id, batch_id)
+
+--- TABLE 11: stock_transfers (History of Stock Given from Warehouse to Staff) ---
+- id: UUID PK DEFAULT uuid_generate_v4()
+- transfer_ref: TEXT NOT NULL
+- transfer_type: TEXT CHECK (transfer_type IN ('Warehouse_To_Employee', 'Employee_Return_To_Warehouse'))
+- emp_id: TEXT FK REFERENCES employees(emp_id) ON DELETE RESTRICT
+- product_id: UUID FK REFERENCES products(id) ON DELETE RESTRICT
+- batch_id: UUID FK REFERENCES product_batches(id) ON DELETE RESTRICT
+- qty: INTEGER NOT NULL CHECK (qty > 0)
+- approved_by_emp_id: TEXT FK REFERENCES employees(emp_id)
+- transfer_date: DATE DEFAULT CURRENT_DATE
+- created_at: TIMESTAMPTZ DEFAULT now()
+
+--- TABLE 12: invoices (Master Bill / Order Header) ---
+- id: UUID PK DEFAULT uuid_generate_v4()
+- invoice_ref: TEXT UNIQUE NOT NULL (Format: 'INV-YYYYMMDD-XXX')
+- order_status: TEXT CHECK (order_status IN ('Order_Booked', 'Packed_Ready', 'Delivered_Final', 'Cancelled')) DEFAULT 'Delivered_Final'
+- stock_source: TEXT CHECK (stock_source IN ('Employee_Stock', 'Warehouse_Direct')) DEFAULT 'Employee_Stock'
+- date_time: TIMESTAMPTZ DEFAULT now()
+- date_only: DATE DEFAULT CURRENT_DATE
+- emp_id: TEXT FK REFERENCES employees(emp_id) ON DELETE RESTRICT
+- customer_id: UUID FK REFERENCES customers(id) ON DELETE RESTRICT
+- market_id: UUID FK REFERENCES markets(id) ON DELETE RESTRICT
+- sub_total: DECIMAL(12,2) NOT NULL
+- discount_percent: DECIMAL(5,2) DEFAULT 0.00
+- discount_amount: DECIMAL(10,2) DEFAULT 0.00
+- net_payable: DECIMAL(12,2) NOT NULL
+- paid_amount: DECIMAL(12,2) DEFAULT 0.00
+- due_amount: DECIMAL(12,2) DEFAULT 0.00
+- total_factory_cost_dp: DECIMAL(12,2) NOT NULL DEFAULT 0.00
+- payment_status: TEXT CHECK (payment_status IN ('Paid', 'Partial', 'Due', 'Cancelled'))
+- payment_method: TEXT CHECK (payment_method IN ('Cash', 'bKash', 'Nagad', 'Bank', 'Due_Only')) DEFAULT 'Cash'
+- approved_by_emp_id: TEXT FK REFERENCES employees(emp_id) NULLABLE
+- notes: TEXT
+
+--- TABLE 13: sales (Individual Medicine Lines on a Bill) ---
+- id: UUID PK DEFAULT uuid_generate_v4()
+- invoice_id: UUID FK REFERENCES invoices(id) ON DELETE CASCADE
+- invoice_ref: TEXT NOT NULL
+- date_time: TIMESTAMPTZ DEFAULT now()
+- date_only: DATE DEFAULT CURRENT_DATE
+- emp_id: TEXT FK REFERENCES employees(emp_id) ON DELETE RESTRICT
+- customer_id: UUID FK REFERENCES customers(id) ON DELETE RESTRICT
+- product_id: UUID FK REFERENCES products(id) ON DELETE RESTRICT
+- batch_id: UUID FK REFERENCES product_batches(id) ON DELETE RESTRICT
+- qty: INTEGER NOT NULL CHECK (qty > 0)
+- bonus_qty: INTEGER DEFAULT 0 CHECK (bonus_qty >= 0)
+- unit_cost_dp: DECIMAL(10,2) NOT NULL
+- unit_price: DECIMAL(10,2) NOT NULL
+- discount_percent: DECIMAL(5,2) DEFAULT 0.00
+- total_price: DECIMAL(12,2) NOT NULL
+- payment_status: TEXT CHECK (payment_status IN ('Paid', 'Partial', 'Due', 'Cancelled'))
+
+--- TABLE 14: sales_returns (Medicine Returned by Pharmacies) ---
+- id: UUID PK DEFAULT uuid_generate_v4()
+- return_ref: TEXT UNIQUE NOT NULL
+- invoice_id: UUID FK REFERENCES invoices(id) ON DELETE SET NULL
+- customer_id: UUID FK REFERENCES customers(id) ON DELETE RESTRICT
+- emp_id: TEXT FK REFERENCES employees(emp_id) ON DELETE RESTRICT
+- product_id: UUID FK REFERENCES products(id) ON DELETE RESTRICT
+- batch_id: UUID FK REFERENCES product_batches(id) ON DELETE RESTRICT
+- returned_qty: INTEGER NOT NULL CHECK (returned_qty > 0)
+- condition: TEXT CHECK (condition IN ('Good_Resaleable', 'Damaged_Broken', 'Expired')) NOT NULL
+- credit_amount_reduced_from_due: DECIMAL(12,2) NOT NULL
+- return_date: DATE DEFAULT CURRENT_DATE
+- notes: TEXT
+- created_at: TIMESTAMPTZ DEFAULT now()
+
+--- TABLE 15: damaged_expired_stock (Quarantine Box) ---
+- id: UUID PK DEFAULT uuid_generate_v4()
+- product_id: UUID FK REFERENCES products(id) ON DELETE RESTRICT
+- batch_id: UUID FK REFERENCES product_batches(id) ON DELETE RESTRICT
+- qty: INTEGER NOT NULL CHECK (qty > 0)
+- reason: TEXT CHECK (reason IN ('Expired_In_Store', 'Broken_In_Delivery', 'Returned_Damaged_By_Pharmacy'))
+- loss_amount_at_dp: DECIMAL(12,2) NOT NULL
+- reported_by_emp_id: TEXT FK REFERENCES employees(emp_id)
+- status: TEXT CHECK (status IN ('Kept_In_Quarantine', 'Replaced_By_Factory', 'Destroyed_Written_Off')) DEFAULT 'Kept_In_Quarantine'
+- date_logged: DATE DEFAULT CURRENT_DATE
+
+--- TABLE 16: ledger (Complete Money Book for Pharmacies, Staff & Factories) ---
+- id: UUID PK DEFAULT uuid_generate_v4()
+- date_time: TIMESTAMPTZ DEFAULT now()
+- date_only: DATE DEFAULT CURRENT_DATE
+- account_type: TEXT CHECK (account_type IN ('Customer', 'Employee', 'Supplier')) DEFAULT 'Employee'
+- emp_id: TEXT FK REFERENCES employees(emp_id) ON DELETE RESTRICT
+- customer_id: UUID FK REFERENCES customers(id) ON DELETE RESTRICT NULLABLE
+- supplier_id: UUID FK REFERENCES suppliers(id) ON DELETE RESTRICT NULLABLE
+- invoice_ref: TEXT NULLABLE
+- payment_method: TEXT DEFAULT 'Cash'
+- description: TEXT NOT NULL
+- debit: DECIMAL(12,2) DEFAULT 0.00 (New Bill / Due Added)
+- credit: DECIMAL(12,2) DEFAULT 0.00 (Money Received / Paid)
+- balance: DECIMAL(12,2) NOT NULL (Running Due Balance)
+
+--- TABLE 17: employee_attendance_targets (Daily Attendance & Monthly Goals) ---
+- attendance:
+  - id: UUID PK DEFAULT uuid_generate_v4()
+  - emp_id: TEXT FK REFERENCES employees(emp_id) ON DELETE CASCADE
+  - work_date: DATE NOT NULL DEFAULT CURRENT_DATE
+  - status: TEXT CHECK (status IN ('Present_Office', 'Present_Market_Duty', 'Leave', 'Absent', 'Holiday'))
+  - market_id: UUID FK REFERENCES markets(id)
+  - ta_da_amount_earned: DECIMAL(8,2) DEFAULT 0.00
+  - marked_by_emp_id: TEXT FK REFERENCES employees(emp_id)
+  - UNIQUE(emp_id, work_date)
+- employee_targets:
+  - id: UUID PK DEFAULT uuid_generate_v4()
+  - emp_id: TEXT FK REFERENCES employees(emp_id) ON DELETE CASCADE
+  - month_year: TEXT NOT NULL (e.g., '2026-11')
+  - target_sales_amount: DECIMAL(12,2) DEFAULT 0.00
+  - achieved_sales_amount: DECIMAL(12,2) DEFAULT 0.00
+  - target_collection_amount: DECIMAL(12,2) DEFAULT 0.00
+  - achieved_collection_amount: DECIMAL(12,2) DEFAULT 0.00
+  - UNIQUE(emp_id, month_year)
+
+--- TABLE 18: payroll_and_expenses (Monthly Salaries & Daily Company Expenses) ---
+- payroll:
+  - id: UUID PK DEFAULT uuid_generate_v4()
+  - salary_month: TEXT NOT NULL
+  - emp_id: TEXT FK REFERENCES employees(emp_id) ON DELETE RESTRICT
+  - working_days: INTEGER DEFAULT 0
+  - base_salary: DECIMAL(10,2) NOT NULL
+  - total_ta_da_earned: DECIMAL(10,2) DEFAULT 0.00
+  - sales_commission_earned: DECIMAL(10,2) DEFAULT 0.00
+  - festival_or_extra_bonus: DECIMAL(10,2) DEFAULT 0.00
+  - advance_salary_deducted: DECIMAL(10,2) DEFAULT 0.00
+  - net_salary_payable: DECIMAL(10,2) NOT NULL
+  - paid_amount: DECIMAL(10,2) DEFAULT 0.00
+  - payment_status: TEXT CHECK (payment_status IN ('Unpaid', 'Paid')) DEFAULT 'Unpaid'
+  - paid_date: DATE
+  - payment_method: TEXT DEFAULT 'Cash'
+  - approved_by_emp_id: TEXT FK REFERENCES employees(emp_id)
+  - UNIQUE(salary_month, emp_id)
+- expenses:
+  - id: UUID PK DEFAULT uuid_generate_v4()
+  - expense_date: DATE DEFAULT CURRENT_DATE
+  - category: TEXT CHECK (category IN ('Office_Warehouse_Rent', 'Delivery_Van_Fuel', 'Electricity_Internet', 'Staff_Tea_Entertainment', 'Packaging_Printing', 'Salary_Payout', 'Other_Expense'))
+  - title: TEXT NOT NULL
+  - amount: DECIMAL(12,2) NOT NULL CHECK (amount > 0)
+  - payment_method: TEXT DEFAULT 'Cash'
+  - entered_by_emp_id: TEXT FK REFERENCES employees(emp_id)
+  - created_at: TIMESTAMPTZ DEFAULT now()
+
+================================================================================
+4. SCREEN-BY-SCREEN UI, IMAGE PLACEMENT & RESPONSIVE DESIGN
+================================================================================
+
+--- GLOBAL NAVIGATION SHELL (`app/dashboard/layout.tsx`) ---
+- Top Bar (Mobile & Desktop):
+  * Left: Senatix Wellness Logo + Active Page Title in bold (`text-slate-900`).
+  * Right: Logged-in Person's **Circular Profile Photo** (or Initials Badge if no photo uploaded), Name, Role Pill (`Super Admin`, `Executor`, `Manager`, `Sales Rep`), and a 1-tap `"My Profile / Change My Photo"` modal button.
+- Desktop Navigation (`lg:flex hidden w-64`): Clean white left sidebar with active green highlight (`bg-emerald-50 text-emerald-700 font-semibold`).
+- Mobile Navigation (`lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-slate-200 z-40`):
+  * 5 Big Thumb Tabs: `1. Home` | `2. Make Bill` | `3. Medicines` | `4. Money Book` | `5. Menu (All Pages)`.
+
+--- SCREEN 1: LOGIN PAGE (`app/page.tsx`) ---
+- Clean Daylight Card (`bg-white shadow-sm border border-slate-200 rounded-2xl p-6 max-w-md w-full mx-auto`).
+- Input 1: `"Employee ID or Mobile Number"` (Large `h-12` input).
+- Input 2: `"PIN / Password"` with `"Show/Hide"` eye icon.
+- Instant 60 FPS feedback on click (`"Signing you in..."`).
+
+--- SCREEN 2: DASHBOARD (`app/dashboard/page.tsx`) ---
+- Personalized Top Card: Shows the logged-in Admin/Executor/Employee's **Profile Photo (`w-14 h-14 rounded-full`)**, `"Welcome, [Name]"`, and their role.
+- 4 Large Quick-Action Buttons (`grid-cols-2 md:grid-cols-4 gap-3`):
+  `[+ Make New Bill]` `[+ Collect Due Money]` `[+ Give Stock to Staff]` `[+ Receive Factory Stock]`
+- 8 KPI Metric Cards (`grid-cols-2 lg:grid-cols-4 gap-3`): High-contrast light cards with large numbers (`text-2xl font-bold text-slate-900`) and clear colored icon badges.
+
+--- SCREEN 3: MAKE NEW BILL / POS (`app/dashboard/billing/page.tsx`) ---
+- Responsive Split Layout:
+  * On Desktop: Left side (60% width) shows Customer Selector + Medicine Grid; Right side (40% width) shows Sticky Invoice Cart & Payment Box.
+  * On Mobile: Stacked step-by-step view with a **Sticky Bottom Bar** showing live Cart Total and `"Tap to Complete Bill"`.
+- Visual Medicine Cards (With Optional Product Image):
+  * Each medicine row/card shows a `48x48px` (`w-12 h-12 rounded-xl`) **Product Photo** on the left (or a clean Pill/Syrup icon if no image was uploaded).
+  * Shows Brand Name, Pack Size, Pharmacy Price (`৳ 300`), Free Bonus Rule (`10+1`), and Available Stock Badge.
+  * Staff can tap the `+` button or type the quantity directly. Free bonus boxes auto-fill instantly.
+- Customer Selector (With Optional Pharmacy/Owner Photo):
+  * Shows Pharmacy Avatar/Photo + Shop Name + Owner Phone + Current Baki (`৳ 4,500`).
+
+--- SCREEN 4: MEDICINE INVENTORY & BATCHES (`app/dashboard/inventory/page.tsx`) ---
+- "Add / Edit Medicine" Modal:
+  * Includes an easy **"Product Photo (Optional)"** upload box at the top:
+    - Staff can tap `"Take Photo / Choose Image"` from phone or PC.
+    - Shows an instant square preview (`w-20 h-20 rounded-xl object-cover`), automatically compresses it to `<30KB WebP`, and uploads it on save.
+    - If skipped, uses the default Medicine Category Icon automatically.
+- Responsive List:
+  * Desktop Table (`hidden md:table`): Columns for `Photo | Medicine Name & Generic | Category & Pack | Stock | Buying Cost (DP) | Pharmacy Price (TP) | MRP | Bonus Offer | Actions`.
+  * Mobile Cards (`md:hidden space-y-2.5`): Each card displays the Product Photo on the left, Name/Price/Stock in the center, and large `[Edit]` / `[+ Add Batch]` buttons at the bottom.
+
+--- SCREEN 5: STAFF, EXECUTORS & ADMIN DIRECTORY (`app/dashboard/employees/page.tsx`) ---
+- Covers **everyone** in the company: Company Owners / Executors, Super Admins, Managers, Accountants, Store Keepers, and all 50+ Field Sales & Delivery Staff.
+- "Add / Edit Person" Modal:
+  * Includes **"Profile Photo (Optional)"** uploader with instant circular preview (`w-20 h-20 rounded-full object-cover`) + `"Remove Photo"` button.
+  * Inputs for ID (`ADM-01`, `EXE-01`, `EMP-01`), Full Name, Role/Designation, Mobile Number, Login PIN/Password, Assigned Market, Base Salary, Daily TA/DA, and Commission %.
+- Staff Directory Cards & Table:
+  * Every employee, manager, and executor/admin card displays their **Circular Profile Photo** (or Initials Badge), Name, Role Badge, Assigned Market, Current Stock Held, Current Collected Due Balance, and action buttons: `[Give Stock]`, `[Receive Cash]`, `[Print ID / Statement PDF]`.
+
+--- SCREEN 6: MARKETS & PHARMACIES (`app/dashboard/markets/page.tsx`) ---
+- Optional Photo Upload for each Pharmacy (`customers.image_url`) so new delivery men can recognize the shop front or owner easily.
+- One-tap `"Call Pharmacy"` (`tel:`) button on mobile cards and `"Collect Baki Money"` modal.
+
+--- SCREEN 7: HR, 1-CLICK ATTENDANCE & PAYROLL (`app/dashboard/hr-payroll/page.tsx`) ---
+- Daily Attendance List shows each employee's **Profile Photo** next to their name so the manager can visually verify and tap `[Present - Market]` or `[Absent]` in seconds without misidentifying staff with similar names.
+- Monthly Salary Sheet displays each employee's photo, name, role, auto-calculated salary breakdown, and `"Pay & Print Payslip PDF"` button.
+
+--- SCREEN 8: MONEY BOOK (LEDGER), EXPENSES & OWNER REPORTS (`app/dashboard/ledger` & `reports`) ---
+- Every ledger entry and invoice displays the photo/avatar and name of the Customer, the Field Employee who handled the bill, and the Admin/Executor/Accountant who approved it.
+- Includes the 1-Click `"Download Complete Company Backup (.xlsx)"` button for Free-Tier safety.
