@@ -23,7 +23,7 @@ export default function LoginPage() {
   const router = useRouter();
   const { mode, toggleMode } = useLanguage();
 
-  const [identifier, setIdentifier] = useState('senatixwellness@gmail.com');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -55,7 +55,7 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const res = erpStore.loginWithCredentials(identifier, password);
+      const res = await erpStore.loginWithCredentials(identifier, password);
       if (res.success && res.user) {
         erpStore.setActivePortal('hq');
         router.push('/dashboard');
@@ -145,9 +145,10 @@ export default function LoginPage() {
               <input
                 type="text"
                 required
+                autoComplete="username"
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
-                placeholder={mode === 'bn' ? 'যেমন: senatixwellness@gmail.com বা ADM-01' : 'e.g. senatixwellness@gmail.com or ADM-01'}
+                placeholder={mode === 'bn' ? 'এডমিন আইডি বা ইমেইল লিখুন' : 'Enter Admin ID or Email'}
                 className="w-full h-12 pl-10 pr-3.5 bg-[#0b0c10] border border-[#2e3036] focus:border-[#de9489] rounded-xl text-sm text-white placeholder-zinc-500 outline-none transition-all font-medium"
               />
               <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-zinc-400" />
@@ -162,6 +163,7 @@ export default function LoginPage() {
               <input
                 type={showPassword ? 'text' : 'password'}
                 required
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••••"
@@ -171,7 +173,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white p-1.5 rounded-lg transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white p-1.5 rounded-lg transition-colors cursor-pointer"
                 aria-label="Toggle Password Visibility"
               >
                 {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
@@ -201,7 +203,7 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={toggleMode}
-            className="flex-1 h-10 bg-[#1b1c20] hover:bg-[#252628] text-zinc-200 rounded-xl text-xs font-semibold flex items-center justify-center space-x-2 border border-[#252628] transition-colors"
+            className="flex-1 h-10 bg-[#1b1c20] hover:bg-[#252628] text-zinc-200 rounded-xl text-xs font-semibold flex items-center justify-center space-x-2 border border-[#252628] transition-colors cursor-pointer"
           >
             <Globe className="size-4 text-[#fae0d1]" />
             <span>{mode === 'bn' ? 'English Language' : 'বাংলা সংস্করণ'}</span>
@@ -210,7 +212,7 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={() => setShowHelpModal(true)}
-            className="flex-1 h-10 bg-[#1b1c20] hover:bg-[#252628] text-zinc-200 rounded-xl text-xs font-semibold flex items-center justify-center space-x-2 border border-[#252628] transition-colors"
+            className="flex-1 h-10 bg-[#1b1c20] hover:bg-[#252628] text-zinc-200 rounded-xl text-xs font-semibold flex items-center justify-center space-x-2 border border-[#252628] transition-colors cursor-pointer"
           >
             <HelpCircle className="size-4 text-[#de9489]" />
             <span>{mode === 'bn' ? 'সাহায্য ও সাপোর্ট' : 'Admin Support'}</span>
@@ -222,7 +224,7 @@ export default function LoginPage() {
           <p className="text-[11px] text-zinc-500 font-medium">
             {mode === 'bn'
               ? 'নিরাপত্তা নির্দেশিকা: আপনার লগইন পাসওয়ার্ড অন্য কারো সাথে শেয়ার করবেন না।'
-              : 'Security Notice: Never share administrative credentials with unauthorized staff.'}
+              : 'Security Notice: Never share administrative credentials with unauthorized personnel.'}
           </p>
         </div>
       </div>
@@ -239,7 +241,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setShowHelpModal(false)}
-                className="text-zinc-400 hover:text-white p-1 rounded-lg"
+                className="text-zinc-400 hover:text-white p-1 rounded-lg cursor-pointer"
               >
                 <X className="size-5" />
               </button>
@@ -248,8 +250,8 @@ export default function LoginPage() {
             <div className="py-4 space-y-3.5 text-xs text-zinc-300">
               <p className="leading-relaxed">
                 {mode === 'bn'
-                  ? 'পাসওয়ার্ড ভুলে গেলে অথবা নতুন এডমিন এক্সেসের জন্য সেনাটিক্স হেড অফিসে যোগাযোগ করুন:'
-                  : 'If you forgot your password or need admin access credentials, contact the Senatix Head Office:'}
+                  ? 'পাসওয়ার্ড ভুলে গেলে অথবা নতুন এডমিন অ্যাকাউন্ট তৈরি করার জন্য প্রধান কার্যালয়ে যোগাযোগ করুন:'
+                  : 'If you forgot your password or need a new admin account provisioned, contact the Head Office:'}
               </p>
               <div className="p-3.5 bg-[#0b0c10] rounded-2xl space-y-2 border border-[#252628]">
                 <div className="flex items-center space-x-2 text-[#fae0d1]">
@@ -259,17 +261,12 @@ export default function LoginPage() {
                 <div className="text-[11px] text-zinc-400 font-mono">senatixwellness@gmail.com</div>
                 <div className="text-[11px] text-zinc-400">হাউজ #১২, রোড #০৪, ধানমন্ডি, ঢাকা</div>
               </div>
-              <p className="text-[11px] text-zinc-400">
-                {mode === 'bn'
-                  ? 'অনুমোদিত এডমিন পাসওয়ার্ড: Senatix1234@'
-                  : 'Official Admin Password: Senatix1234@'}
-              </p>
             </div>
 
             <button
               type="button"
               onClick={() => setShowHelpModal(false)}
-              className="w-full h-11 bg-white hover:bg-zinc-100 text-[#0b0c10] font-bold rounded-xl text-xs transition-colors"
+              className="w-full h-11 bg-white hover:bg-zinc-100 text-[#0b0c10] font-bold rounded-xl text-xs transition-colors cursor-pointer"
             >
               {mode === 'bn' ? 'ঠিক আছে' : 'Got It'}
             </button>

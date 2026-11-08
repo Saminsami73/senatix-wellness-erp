@@ -50,8 +50,10 @@ export default function DashboardPage() {
   const [chartRange, setChartRange] = useState<'today' | '7d' | '30d'>('7d');
   const [user, setUser] = useState<Employee>(erpStore.getCurrentUser());
   const [includeEmpStock, setIncludeEmpStock] = useState<boolean>(true);
+  const [isMounted, setIsMounted] = useState<boolean>(false);
 
   useEffect(() => {
+    setIsMounted(true);
     const unsub = erpStore.subscribe(() => {
       setMetrics(erpStore.getDashboardMetrics());
       setEmployees(erpStore.getEmployees());
@@ -407,26 +409,32 @@ export default function DashboardPage() {
 
         {/* Recharts Bar Graph */}
         <div className="h-64 w-full mt-4">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={currentChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#252628" vertical={false} />
-              <XAxis dataKey="name" stroke="#7a7d82" fontSize={11} tickLine={false} />
-              <YAxis stroke="#7a7d82" fontSize={11} tickLine={false} tickFormatter={(val) => `৳${val / 1000}k`} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#15161c',
-                  borderColor: '#252628',
-                  borderRadius: '8px',
-                  color: '#fff',
-                  fontSize: '12px',
-                }}
-                formatter={(value: any) => [`৳ ${Number(value).toLocaleString()}`, '']}
-              />
-              <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
-              <Bar dataKey="Sales" name={mode === 'bn' ? 'মোট বিক্রি' : 'Total Sales'} fill="#10b981" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="Collection" name={mode === 'bn' ? 'নগদ আদায়' : 'Cash Collected'} fill="#f59e0b" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          {isMounted ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={currentChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#252628" vertical={false} />
+                <XAxis dataKey="name" stroke="#7a7d82" fontSize={11} tickLine={false} />
+                <YAxis stroke="#7a7d82" fontSize={11} tickLine={false} tickFormatter={(val) => `৳${val / 1000}k`} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#15161c',
+                    borderColor: '#252628',
+                    borderRadius: '8px',
+                    color: '#fff',
+                    fontSize: '12px',
+                  }}
+                  formatter={(value: any) => [`৳ ${Number(value).toLocaleString()}`, '']}
+                />
+                <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
+                <Bar dataKey="Sales" name={mode === 'bn' ? 'মোট বিক্রি' : 'Total Sales'} fill="#10b981" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="Collection" name={mode === 'bn' ? 'নগদ আদায়' : 'Cash Collected'} fill="#f59e0b" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-full w-full bg-[#15161c] rounded-lg flex items-center justify-center text-zinc-600 text-xs">
+              Loading chart...
+            </div>
+          )}
         </div>
       </div>
 

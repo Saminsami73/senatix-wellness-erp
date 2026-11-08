@@ -20,7 +20,7 @@ import {
   Doctor,
   DoctorExpense,
 } from '@/types/erp';
-import { isSupabaseConfigured, fetchFromCloud, syncRecordToCloud, deleteRecordFromCloud, generateUUID } from '@/lib/supabase';
+import { isSupabaseConfigured, fetchFromCloud, syncRecordToCloud, deleteRecordFromCloud, generateUUID, supabase } from '@/lib/supabase';
 
 // SEED DATA FOR IMMEDIATE OUT-OF-THE-BOX OPERATION
 const initialMarkets: Market[] = [
@@ -796,22 +796,93 @@ class ERPStore {
     this.saveToStorage();
   }
 
-  public loginWithCredentials(identifier: string, secret: string): { success: boolean; user?: Employee; message?: string } {
+  public async loginWithCredentials(
+    identifier: string,
+    secret: string
+  ): Promise<{ success: boolean; user?: Employee; message?: string }> {
     const cleanId = identifier.trim().toLowerCase().replace('@senatix.local', '');
     const cleanSecret = secret.trim();
 
-    // Production Master Credentials Check:
-    // Requires secure production password (e.g. Senatix1234@ or Saminsami1234)
-    const validPasswords = ['senatix1234@', 'saminsami1234', 'senatix2026@', 'senatixadmin2026!'];
-    const isPasswordValid = validPasswords.includes(cleanSecret.toLowerCase());
-
-    if (!isPasswordValid) {
+    if (!cleanId || !cleanSecret) {
       return {
         success: false,
-        message: 'পাসওয়ার্ড সঠিক নয়। আপনার এডমিন পাসওয়ার্ড প্রদান করুন (যেমন: Senatix1234@)।',
+        message: 'অনুগ্রহ করে আইডি এবং পাসওয়ার্ড উভয় তথ্যই প্রদান করুন।',
       };
     }
 
+    // Master/standard passwords accepted across the system
+    const validMasterPasswords = [
+      'senatix1234@',
+      'saminsami1234',
+      'senatix2026@',
+      'senatixadmin2026!',
+    ];
+
+    // STEP 1: Attempt Authentication via Supabase Auth (for customized email/password users created in Supabase Dashboard)
+    if (isSupabaseConfigured() && cleanId.includes('@')) {
+      try {
+        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+          email: cleanId,
+          password: cleanSecret,
+        });
+
+        if (!authError && authData?.user) {
+          const userEmail = (authData.user.email || cleanId).toLowerCase();
+
+          // Refresh employees from database to get latest records
+          try {
+            const { data: cloudEmp } = await supabase.from('employees').select('*');
+            if (cloudEmp && cloudEmp.length > 0) {
+              this.employees = cloudEmp;
+            }
+          } catch (e) {}
+
+          let matched = this.employees.find(
+            (e) =>
+              e.emp_id.toLowerCase() === userEmail ||
+              e.phone.replace(/[^0-9]/g, '') === cleanId.replace(/[^0-9]/g, '')
+          );
+
+          if (!matched) {
+            // First time customized Supabase Auth user: automatically create active administrator profile
+            matched = {
+              emp_id: `ADM-${authData.user.id.substring(0, 6).toUpperCase()}`,
+              name: authData.user.user_metadata?.name || userEmail.split('@')[0] || 'Administrator',
+              phone: authData.user.phone || '01711000000',
+              designation: 'System Administrator',
+              role: 'super_admin',
+              is_active: true,
+              base_salary: 0,
+              daily_ta_da: 0,
+              commission_percent: 0,
+              current_due_balance: 0,
+              salary_advance_balance: 0,
+            };
+            this.employees.unshift(matched);
+            syncRecordToCloud('employees', matched);
+          }
+
+          this.currentUser = matched;
+          this.activePortal = 'hq';
+          this.saveToStorage();
+          return { success: true, user: matched };
+        }
+      } catch (err) {
+        // Fall through to database / employee lookup
+      }
+    }
+
+    // STEP 2: Fetch latest employees from Supabase database (in case new staff were added)
+    if (isSupabaseConfigured()) {
+      try {
+        const { data: cloudEmp } = await supabase.from('employees').select('*');
+        if (cloudEmp && cloudEmp.length > 0) {
+          this.employees = cloudEmp;
+        }
+      } catch (err) {}
+    }
+
+    // STEP 3: Match Employee by ID, Email or Phone
     const isSuperAdminIdentifier =
       cleanId === 'adm-01' ||
       cleanId === 'senatixwellness@gmail.com' ||
@@ -832,18 +903,46 @@ class ERPStore {
       found = this.employees.find((e) => e.role === 'executor') || this.employees[1];
     } else {
       found = this.employees.find(
-        (e) => e.emp_id.toLowerCase() === cleanId || e.phone.replace(/[^0-9]/g, '') === cleanId.replace(/[^0-9]/g, '')
+        (e) =>
+          e.emp_id.toLowerCase() === cleanId ||
+          e.phone.replace(/[^0-9]/g, '') === cleanId.replace(/[^0-9]/g, '')
       );
     }
 
     if (!found) {
       return {
         success: false,
-        message: 'প্রদত্ত আইডি বা ইমেইল পাওয়া যায়নি।',
+        message: 'প্রদত্ত আইডি বা ইমেইল পাওয়া যায়নি। অনুগ্রহ করে সঠিক তথ্য প্রদান করুন।',
       };
     }
 
-    // STRICT ROLE CONTROL: Only Admins & Executives can enter the ERP web application
+    // STEP 4: Password Verification
+    const isMasterPassword = validMasterPasswords.includes(cleanSecret.toLowerCase());
+    if (!isMasterPassword) {
+      // If the password doesn't match master passwords, check Supabase Auth for this user's email if available
+      let authVerified = false;
+      if (isSupabaseConfigured()) {
+        try {
+          const tryEmail = cleanId.includes('@') ? cleanId : `${cleanId}@senatix.local`;
+          const { data } = await supabase.auth.signInWithPassword({
+            email: tryEmail,
+            password: cleanSecret,
+          });
+          if (data?.user) {
+            authVerified = true;
+          }
+        } catch (e) {}
+      }
+
+      if (!authVerified) {
+        return {
+          success: false,
+          message: 'পাসওয়ার্ড সঠিক নয়। অনুগ্রহ করে সঠিক পাসওয়ার্ড প্রদান করুন।',
+        };
+      }
+    }
+
+    // STEP 5: Strict Role Control (Admins, Executives, Managers, Accountants, Store Keepers)
     const allowedRoles = ['super_admin', 'executor', 'manager', 'accountant', 'store_keeper'];
     if (!allowedRoles.includes(found.role)) {
       return {
@@ -853,6 +952,7 @@ class ERPStore {
     }
 
     this.currentUser = found;
+    this.activePortal = 'hq';
     this.saveToStorage();
     return { success: true, user: found };
   }

@@ -9,6 +9,7 @@ import { BrandLogo } from '@/components/ui/BrandLogo';
 import { Receipt, Menu, Sun, Moon, Globe } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useTheme } from '@/context/ThemeContext';
+import { RealtimeNotificationProvider } from '@/context/RealtimeNotificationContext';
 import { LiveNotificationCenter } from '@/components/ui/LiveNotificationCenter';
 
 export default function DashboardLayout({
@@ -23,7 +24,8 @@ export default function DashboardLayout({
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <div className="min-h-screen bg-[#0b0c10] text-[#c0c4cd] flex overflow-x-hidden transition-colors duration-200">
+    <RealtimeNotificationProvider>
+      <div className="min-h-screen bg-[#0b0c10] text-[#c0c4cd] flex overflow-x-hidden transition-colors duration-200">
       {/* Desktop Left Sidebar (xl:flex hidden) */}
       <div className="hidden xl:block fixed left-0 inset-y-0 z-30">
         <LeftSidebar />
@@ -133,5 +135,6 @@ export default function DashboardLayout({
         onClose={() => setQuickBillOpen(false)}
       />
     </div>
+    </RealtimeNotificationProvider>
   );
 }
