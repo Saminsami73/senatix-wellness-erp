@@ -382,6 +382,27 @@ BEGIN
 END $$;
 
 
+-- ----------------------------------------------------------------------------
+-- 14B. ENABLE SUPABASE REALTIME WEBSOCKET REPLICATION (100% FREE)
+-- Broadcasts live inserts/updates to all connected browsers and phones.
+-- ----------------------------------------------------------------------------
+DO $$
+DECLARE
+  t TEXT;
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime') THEN
+    FOREACH t IN ARRAY ARRAY['invoices', 'ledger', 'emp_stock', 'stock_transfers', 'expenses', 'products', 'product_batches']
+    LOOP
+      BEGIN
+        EXECUTE format('ALTER PUBLICATION supabase_realtime ADD TABLE %I;', t);
+      EXCEPTION WHEN OTHERS THEN
+        NULL;
+      END;
+    END LOOP;
+  END IF;
+END $$;
+
+
 -- ============================================================================
 -- 15. INITIAL SEED DATA FOR IMMEDIATE USE
 -- Inserts initial medicines, employees, batches and doctors.

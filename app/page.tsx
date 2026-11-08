@@ -255,8 +255,10 @@ export default function LoginPage() {
               </p>
               <div className="p-3.5 bg-[#0b0c10] rounded-2xl space-y-2 border border-[#252628]">
                 <div className="flex items-center space-x-2 text-[#fae0d1]">
-                  <PhoneCall className="size-4" />
-                  <span className="font-bold text-sm">01711-000001</span>
+                  <PhoneCall className="size-4 shrink-0" />
+                  <a href="tel:+8801770578142" className="font-bold text-sm tracking-tight hover:underline">
+                    +880 1770-578142
+                  </a>
                 </div>
                 <div className="text-[11px] text-zinc-400 font-mono">senatixwellness@gmail.com</div>
                 <div className="text-[11px] text-zinc-400">হাউজ #১২, রোড #০৪, ধানমন্ডি, ঢাকা</div>

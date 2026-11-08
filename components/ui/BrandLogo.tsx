@@ -1,6 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useTheme } from '@/context/ThemeContext';
 
 interface BrandLogoProps {
   size?: 'sm' | 'md' | 'lg';
@@ -13,6 +14,20 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
   variant = 'badge',
   showSubtitle = false,
 }) => {
+  let theme = 'dark';
+  try {
+    const themeContext = useTheme();
+    theme = themeContext.theme;
+  } catch (e) {
+    // Fallback if rendered outside ThemeContext
+  }
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const logoDimensions = {
     sm: 'w-7 h-7',
     md: 'w-9 h-9',
@@ -25,6 +40,10 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
     lg: 'h-9',
   }[size];
 
+  // In dark mode: inverted to pure crisp white letters on 100% transparent background
+  // In light mode: preserved original rich petrol teal on 100% transparent background
+  const isDark = mounted ? theme === 'dark' : true;
+
   return (
     <div className="flex items-center space-x-2 select-none">
       {/* 3D Metallic Emerald & Gold Monogram Logo */}
@@ -35,22 +54,17 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
       />
 
       <div className="flex flex-col justify-center">
-        {/* Contrast Fixed Stencil Wordmark */}
-        {variant === 'badge' ? (
-          <div className="bg-emerald-50/95 px-2 py-0.5 rounded-md flex items-center shadow-sm border border-emerald-200/50">
-            <img
-              src="/brand/Senatix_text_transparent.png"
-              alt="senatix"
-              className={`${textDimensions} object-contain`}
-            />
-          </div>
-        ) : (
+        {/* Transparent opposite-colored Wordmark */}
+        <div className="flex items-center bg-transparent">
           <img
             src="/brand/Senatix_text_transparent.png"
             alt="senatix"
-            className={`${textDimensions} object-contain brightness-150 contrast-125 drop-shadow-[0_0_8px_rgba(52,211,153,0.35)]`}
+            className={`${textDimensions} object-contain transition-all duration-200`}
+            style={{
+              filter: isDark ? 'brightness(0) invert(1)' : 'none',
+            }}
           />
-        )}
+        </div>
 
         {showSubtitle && (
           <span className="text-[10px] text-emerald-400 font-medium tracking-wider mt-0.5 uppercase">

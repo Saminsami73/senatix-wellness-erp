@@ -32,6 +32,7 @@ interface NotificationContextType {
   markAllAsRead: () => void;
   clearAll: () => void;
   addNotification: (notif: Omit<LiveNotification, 'id' | 'timestamp' | 'read'>) => void;
+  broadcastAlert: (notif: Omit<LiveNotification, 'id' | 'timestamp' | 'read'>) => void;
 }
 
 const RealtimeNotificationContext = createContext<NotificationContextType | null>(null);
@@ -46,7 +47,7 @@ function playGentleChime() {
     const ctx = new AudioContextClass();
     const now = ctx.currentTime;
 
-    // First harmonious tone (587.33 Hz - D5)
+    // First tone (587.33 Hz - D5)
     const osc1 = ctx.createOscillator();
     const gain1 = ctx.createGain();
     osc1.type = 'sine';
@@ -70,17 +71,28 @@ function playGentleChime() {
     osc2.start(now + 0.08);
     osc2.stop(now + 0.55);
   } catch (err) {
-    // Browser audio policy might require user interaction first
+    // Audio policy may require user interaction first
   }
 }
 
 export function RealtimeNotificationProvider({ children }: { children: React.ReactNode }) {
   const { mode } = useLanguage();
-  const [notifications, setNotifications] = useState<LiveNotification[]>([]);
+  const [notifications, setNotifications] = useState<LiveNotification[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('senatix_live_notifications');
+        return saved ? JSON.parse(saved) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+    return [];
+  });
   const [activeToast, setActiveToast] = useState<LiveNotification | null>(null);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
   const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const channelRef = useRef<any>(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -98,14 +110,22 @@ export function RealtimeNotificationProvider({ children }: { children: React.Rea
         read: false,
       };
 
-      setNotifications((prev) => [newNotif, ...prev.slice(0, 19)]); // Keep last 20
+      setNotifications((prev) => {
+        const updated = [newNotif, ...prev.slice(0, 24)];
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.setItem('senatix_live_notifications', JSON.stringify(updated));
+          } catch (e) {}
+        }
+        return updated;
+      });
 
       // Show floating toast
       setActiveToast(newNotif);
       if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
       toastTimeoutRef.current = setTimeout(() => {
         setActiveToast(null);
-      }, 5500);
+      }, 5000);
 
       // Play audio chime if enabled
       if (soundEnabled) {
@@ -118,15 +138,37 @@ export function RealtimeNotificationProvider({ children }: { children: React.Rea
     [soundEnabled]
   );
 
-  // Single safe Supabase Realtime channel subscription
+  const broadcastAlert = useCallback(
+    (notif: Omit<LiveNotification, 'id' | 'timestamp' | 'read'>) => {
+      addNotification(notif);
+      if (isSupabaseConfigured() && channelRef.current) {
+        try {
+          channelRef.current.send({
+            type: 'broadcast',
+            event: 'notification',
+            payload: notif,
+          });
+        } catch (e) {}
+      }
+    },
+    [addNotification]
+  );
+
+  // Single safe Supabase Realtime channel subscription (Broadcast + PostgreSQL replication)
   useEffect(() => {
     if (!isMounted || !isSupabaseConfigured()) return;
 
-    // Use a unique channel id to guarantee no collision across reloads or HMR
-    const channelId = `senatix_realtime_${Date.now()}`;
-    const channel = supabase.channel(channelId);
+    const channel = supabase.channel('senatix_erp_live_channel', {
+      config: { broadcast: { self: false } },
+    });
+    channelRef.current = channel;
 
     channel
+      .on('broadcast', { event: 'notification' }, (payload) => {
+        if (payload?.payload) {
+          addNotification(payload.payload);
+        }
+      })
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'invoices' },
@@ -166,8 +208,8 @@ export function RealtimeNotificationProvider({ children }: { children: React.Rea
               type: 'stock',
               title: 'Staff Inventory Updated',
               title_bn: 'কর্মীর ওষুধের স্টক আপডেট হয়েছে',
-              description: 'Stock transfer between warehouse and staff has been recorded.',
-              description_bn: 'গুদাম ও কর্মীর মধ্যকার ওষুধের হস্তান্তর সফলভাবে সংরক্ষিত হয়েছে।',
+              description: 'Stock transfer between warehouse and staff recorded.',
+              description_bn: 'গুদাম ও কর্মীর মধ্যকার ওষুধের হস্তান্তর সংরক্ষিত হয়েছে।',
             });
           }
         }
@@ -188,27 +230,38 @@ export function RealtimeNotificationProvider({ children }: { children: React.Rea
       )
       .subscribe((status, err) => {
         if (err) {
-          console.warn('[Supabase Realtime] Subscription status:', status, err);
+          console.warn('[Supabase Realtime] Status:', status, err);
         }
       });
 
     return () => {
       try {
         supabase.removeChannel(channel);
-      } catch (e) {
-        // Safe channel cleanup
-      }
+      } catch (e) {}
     };
   }, [isMounted, addNotification]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const markAllAsRead = useCallback(() => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    setNotifications((prev) => {
+      const updated = prev.map((n) => ({ ...n, read: true }));
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('senatix_live_notifications', JSON.stringify(updated));
+        } catch (e) {}
+      }
+      return updated;
+    });
   }, []);
 
   const clearAll = useCallback(() => {
     setNotifications([]);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem('senatix_live_notifications');
+      } catch (e) {}
+    }
   }, []);
 
   const getIcon = (type: LiveNotification['type']) => {
@@ -236,6 +289,7 @@ export function RealtimeNotificationProvider({ children }: { children: React.Rea
         markAllAsRead,
         clearAll,
         addNotification,
+        broadcastAlert,
       }}
     >
       {children}

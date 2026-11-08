@@ -746,7 +746,7 @@ export default function EmployeesDirectoryPage() {
                 {mode === 'bn' ? 'সেনাটিক্স ওয়েলনেস ডিস্ট্রিবিউশন' : 'SENATIX WELLNESS DISTRIBUTION'}
               </h2>
               <p className="text-xs text-zinc-600 mt-0.5">
-                হাউজ #১২, রোড #০৪, ধানমন্ডি, ঢাকা • ফোন: 01711-000001
+                হাউজ #১২, রোড #০৪, ধানমন্ডি, ঢাকা • ফোন: +880 1770-578142
               </p>
               <div className="inline-block px-3 py-1 bg-zinc-900 text-white rounded-full text-xs font-bold tracking-wider uppercase mt-2">
                 {mode === 'bn' ? 'অফিসিয়াল ক্যাশ জমা মানি রিসিট' : 'OFFICIAL MONEY RECEIPT VOUCHER'}

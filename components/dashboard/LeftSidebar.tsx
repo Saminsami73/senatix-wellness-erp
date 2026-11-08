@@ -284,9 +284,12 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({ onCloseMobile }) => {
               {mode === 'bn' ? 'জরুরি সহায়তা' : 'Emergency Hotline'}
             </span>
           </div>
-          <p className="text-[11px] text-zinc-900 font-bold mt-1">
-            01711-000001
-          </p>
+          <a
+            href="tel:+8801770578142"
+            className="text-[12px] text-zinc-950 font-bold mt-1 block hover:underline tracking-tight"
+          >
+            +880 1770-578142
+          </a>
           <div className="mt-2 pt-1 border-t border-black/10 flex items-center justify-between text-[10px] font-semibold text-zinc-900">
             <span>{mode === 'bn' ? 'সার্বক্ষণিক সাপোর্ট' : 'Support Desk'}</span>
             <span className="text-emerald-950 bg-white/40 px-1.5 py-0.5 rounded">

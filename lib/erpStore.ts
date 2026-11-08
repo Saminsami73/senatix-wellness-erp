@@ -35,9 +35,8 @@ const initialEmployees: Employee[] = [
   {
     emp_id: 'ADM-01',
     name: 'Samin Yeasar',
-    image_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-    phone: '01711000001',
-    designation: 'Super Administrator',
+    phone: '+8801770578142',
+    designation: 'Chief Executive Officer & Super Admin',
     role: 'super_admin',
     joining_date: '2023-01-01',
     primary_market_id: 'mkt-1',
@@ -51,13 +50,12 @@ const initialEmployees: Employee[] = [
   {
     emp_id: 'EXE-01',
     name: 'Dr. Rafiqul Islam',
-    image_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-    phone: '01711000002',
-    designation: 'Managing Director / Executor',
+    phone: '+8801711000002',
+    designation: 'Managing Director',
     role: 'executor',
     joining_date: '2023-01-01',
     primary_market_id: 'mkt-2',
-    base_salary: 95000,
+    base_salary: 120000,
     daily_ta_da: 600,
     commission_percent: 3.0,
     current_due_balance: 0,
@@ -67,9 +65,8 @@ const initialEmployees: Employee[] = [
   {
     emp_id: 'MGR-01',
     name: 'Farhan Ahmed',
-    image_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
-    phone: '01711000003',
-    designation: 'General Operations Manager',
+    phone: '+8801711000005',
+    designation: 'Chief Operations Manager',
     role: 'manager',
     joining_date: '2023-03-15',
     primary_market_id: 'mkt-3',
@@ -77,19 +74,18 @@ const initialEmployees: Employee[] = [
     daily_ta_da: 400,
     commission_percent: 1.5,
     current_due_balance: 0,
-    salary_advance_balance: 5000,
+    salary_advance_balance: 0,
     is_active: true,
   },
   {
     emp_id: 'ACC-01',
-    name: 'Nazrul Islam',
-    image_url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80',
-    phone: '01711000004',
-    designation: 'Chief Accountant',
+    name: 'Nazmul Huda',
+    phone: '+8801711000004',
+    designation: 'Chief Financial Accountant',
     role: 'accountant',
     joining_date: '2023-04-01',
     primary_market_id: null,
-    base_salary: 50000,
+    base_salary: 45000,
     daily_ta_da: 300,
     commission_percent: 0,
     current_due_balance: 0,
@@ -98,14 +94,13 @@ const initialEmployees: Employee[] = [
   },
   {
     emp_id: 'STR-01',
-    name: 'Tariqul Hasan',
-    image_url: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80',
-    phone: '01711000005',
-    designation: 'Store & Warehouse Keeper',
+    name: 'Belal Hossain',
+    phone: '+8801711000003',
+    designation: 'Central Godown & Store In-charge',
     role: 'store_keeper',
     joining_date: '2023-05-10',
     primary_market_id: null,
-    base_salary: 35000,
+    base_salary: 32000,
     daily_ta_da: 250,
     commission_percent: 0,
     current_due_balance: 0,
@@ -115,165 +110,95 @@ const initialEmployees: Employee[] = [
   {
     emp_id: 'EMP-001',
     name: 'Tanvir Hossain',
-    image_url: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&auto=format&fit=crop&q=80',
-    phone: '01711000010',
+    phone: '01712000001',
     designation: 'Senior Sales Officer (MPO)',
     role: 'sales_rep',
     joining_date: '2023-06-01',
     primary_market_id: 'mkt-1',
-    base_salary: 28000,
+    base_salary: 24000,
     daily_ta_da: 350,
     commission_percent: 2.5,
-    current_due_balance: 14200,
-    salary_advance_balance: 2000,
+    current_due_balance: 0,
+    salary_advance_balance: 0,
     is_active: true,
   },
   {
     emp_id: 'EMP-002',
     name: 'Shakib Al Hasan',
-    image_url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80',
-    phone: '01711000011',
-    designation: 'Territory Sales Officer',
+    phone: '01712000002',
+    designation: 'Medical Sales Executive',
     role: 'sales_rep',
     joining_date: '2023-07-15',
     primary_market_id: 'mkt-2',
-    base_salary: 26000,
+    base_salary: 22000,
     daily_ta_da: 350,
     commission_percent: 2.0,
-    current_due_balance: 8500,
+    current_due_balance: 0,
     salary_advance_balance: 0,
     is_active: true,
   },
   {
     emp_id: 'EMP-003',
-    name: 'Mehedi Hasan',
-    image_url: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150&auto=format&fit=crop&q=80',
-    phone: '01711000012',
-    designation: 'Field Sales Representative',
+    name: 'Kamrul Hasan',
+    phone: '01712000003',
+    designation: 'Territory Officer',
     role: 'sales_rep',
     joining_date: '2023-08-01',
     primary_market_id: 'mkt-3',
-    base_salary: 25000,
+    base_salary: 20000,
     daily_ta_da: 350,
     commission_percent: 2.0,
-    current_due_balance: 6200,
+    current_due_balance: 0,
     salary_advance_balance: 0,
     is_active: true,
   },
   {
-    emp_id: 'EMP-004',
-    name: 'Rakibul Islam',
-    image_url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80',
-    phone: '01711000013',
-    designation: 'Field Sales Representative',
-    role: 'sales_rep',
-    joining_date: '2023-09-01',
-    primary_market_id: 'mkt-4',
-    base_salary: 25000,
-    daily_ta_da: 350,
-    commission_percent: 2.0,
-    current_due_balance: 11400,
-    salary_advance_balance: 1500,
-    is_active: true,
-  },
-  {
-    emp_id: 'EMP-005',
-    name: 'Ashikur Rahman',
-    image_url: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=150&auto=format&fit=crop&q=80',
-    phone: '01711000014',
-    designation: 'Van Delivery Incharge',
+    emp_id: 'DEL-01',
+    name: 'Rubel Mia',
+    phone: '01713000001',
+    designation: 'Delivery Van Driver',
     role: 'sales_rep',
     joining_date: '2023-10-01',
     primary_market_id: 'mkt-5',
-    base_salary: 24000,
+    base_salary: 18000,
     daily_ta_da: 350,
     commission_percent: 1.5,
-    current_due_balance: 4100,
+    current_due_balance: 0,
     salary_advance_balance: 0,
     is_active: true,
   },
 ];
 
-const initialCustomers: Customer[] = [
-  {
-    id: 'cust-1',
-    customer_code: 'PHARM-1001',
-    shop_name: 'Popular Medicine Corner',
-    owner_name: 'Haji Mohammad Younus',
-    image_url: 'https://images.unsplash.com/photo-1576602976047-174e57a47881?w=150&auto=format&fit=crop&q=80',
-    phone: '01819000101',
-    address: 'Plot 12, Main Road, Mirpur-10, Dhaka',
-    drug_license_no: 'DL-DHK-48291',
-    market_id: 'mkt-1',
-    assigned_emp_id: 'EMP-001',
-    credit_limit: 80000,
-    current_due_balance: 18500,
-    is_active: true,
-  },
-  {
-    id: 'cust-2',
-    customer_code: 'PHARM-1002',
-    shop_name: 'Al-Madina Pharmacy & Surgicals',
-    owner_name: 'Kabir Hossain',
-    image_url: 'https://images.unsplash.com/photo-1586015555751-63c299c85583?w=150&auto=format&fit=crop&q=80',
-    phone: '01819000102',
-    address: 'Road 7/A, Dhanmondi, Dhaka',
-    drug_license_no: 'DL-DHK-39102',
-    market_id: 'mkt-2',
-    assigned_emp_id: 'EMP-002',
-    credit_limit: 60000,
-    current_due_balance: 9200,
-    is_active: true,
-  },
-  {
-    id: 'cust-3',
-    customer_code: 'PHARM-1003',
-    shop_name: 'Care Chemists & Wellness',
-    owner_name: 'Dr. Shahinur Alam',
-    phone: '01819000103',
-    address: 'Sector 3, Jashimuddin Ave, Uttara, Dhaka',
-    drug_license_no: 'DL-DHK-91283',
-    market_id: 'mkt-3',
-    assigned_emp_id: 'EMP-003',
-    credit_limit: 100000,
-    current_due_balance: 24000,
-    is_active: true,
-  },
-  {
-    id: 'cust-4',
-    customer_code: 'PHARM-1004',
-    shop_name: 'Labaid Central Drug House',
-    owner_name: 'Mahbubur Rahman',
-    phone: '01819000104',
-    address: 'Wireless Gate, Mohakhali, Dhaka',
-    drug_license_no: 'DL-DHK-81726',
-    market_id: 'mkt-4',
-    assigned_emp_id: 'EMP-004',
-    credit_limit: 75000,
-    current_due_balance: 14500,
-    is_active: true,
-  },
-  {
-    id: 'cust-5',
-    customer_code: 'PHARM-1005',
-    shop_name: 'Green Life Dispensary',
-    owner_name: 'Jahirul Islam',
-    phone: '01819000105',
-    address: 'Savar Bus Stand Market, Savar, Dhaka',
-    drug_license_no: 'DL-DHK-19283',
-    market_id: 'mkt-5',
-    assigned_emp_id: 'EMP-005',
-    credit_limit: 50000,
-    current_due_balance: 7800,
-    is_active: true,
-  },
-];
+const initialCustomers: Customer[] = [];
 
 const initialSuppliers: Supplier[] = [
-  { id: 'sup-1', name: 'Beximco Pharmaceuticals Ltd.', contact_person: 'Md. Saifullah', phone: '01713000011', address: 'Tongi, Gazipur', payable_balance: 45000, is_active: true },
-  { id: 'sup-2', name: 'Square Healthcare Ltd.', contact_person: 'Azizul Haque', phone: '01713000012', address: 'Salgaria, Pabna', payable_balance: 28000, is_active: true },
-  { id: 'sup-3', name: 'Incepta Formulations Ltd.', contact_person: 'Rezaul Karim', phone: '01713000013', address: 'Zirabo, Savar', payable_balance: 15000, is_active: true },
-  { id: 'sup-4', name: 'Renata Distribution Ltd.', contact_person: 'Shamsul Alam', phone: '01713000014', address: 'Mirpur, Dhaka', payable_balance: 32000, is_active: true },
+  {
+    id: 'b0000000-0000-0000-0000-000000000001',
+    name: 'Senatix Pharma Factory Unit-1',
+    contact_person: 'Engr. Mahbubul Alam',
+    phone: '01819000001',
+    address: 'Tongi I/A, Gazipur',
+    payable_balance: 0,
+    is_active: true,
+  },
+  {
+    id: 'b0000000-0000-0000-0000-000000000002',
+    name: 'Square Formulations Lab',
+    contact_person: 'Dr. Saiful Islam',
+    phone: '01819000002',
+    address: 'Pabna Plant',
+    payable_balance: 0,
+    is_active: true,
+  },
+  {
+    id: 'b0000000-0000-0000-0000-000000000003',
+    name: 'Apex Sterile Healthcare',
+    contact_person: 'Farhan Kabir',
+    phone: '01819000003',
+    address: 'Bhaluka, Mymensingh',
+    payable_balance: 0,
+    is_active: true,
+  },
 ];
 
 const initialDoctors: Doctor[] = [
@@ -488,81 +413,19 @@ const initialBatches: ProductBatch[] = [
   { id: 'd0000000-0000-0000-0000-000000000009', product_id: 'c0000000-0000-0000-0000-000000000008', batch_no: 'CD-25A02', mfg_date: '2025-01-20', exp_date: '2027-01-19', cost_price_dp: 160, trade_price_tp: 220, mrp: 275, warehouse_qty: 140, is_active: true },
 ];
 
-const initialEmpStock: EmpStock[] = [
-  { id: 'e0000000-0000-0000-0000-000000000001', emp_id: 'EMP-001', product_id: 'c0000000-0000-0000-0000-000000000001', batch_id: 'd0000000-0000-0000-0000-000000000001', qty: 25 },
-  { id: 'e0000000-0000-0000-0000-000000000002', emp_id: 'EMP-001', product_id: 'c0000000-0000-0000-0000-000000000002', batch_id: 'd0000000-0000-0000-0000-000000000003', qty: 15 },
-  { id: 'e0000000-0000-0000-0000-000000000003', emp_id: 'EMP-001', product_id: 'c0000000-0000-0000-0000-000000000003', batch_id: 'd0000000-0000-0000-0000-000000000004', qty: 30 },
-  { id: 'e0000000-0000-0000-0000-000000000004', emp_id: 'EMP-002', product_id: 'c0000000-0000-0000-0000-000000000001', batch_id: 'd0000000-0000-0000-0000-000000000001', qty: 20 },
-  { id: 'e0000000-0000-0000-0000-000000000005', emp_id: 'EMP-002', product_id: 'c0000000-0000-0000-0000-000000000006', batch_id: 'd0000000-0000-0000-0000-000000000007', qty: 15 },
-  { id: 'e0000000-0000-0000-0000-000000000006', emp_id: 'EMP-003', product_id: 'c0000000-0000-0000-0000-000000000007', batch_id: 'd0000000-0000-0000-0000-000000000008', qty: 40 },
-];
+const initialEmpStock: EmpStock[] = [];
 
 const initialInvoices: Invoice[] = [];
 
 const initialLedger: LedgerEntry[] = [];
 
-const initialExpenses: Expense[] = [
-  {
-    id: 'e1000000-0000-0000-0000-000000000001',
-    expense_date: new Date().toISOString().split('T')[0],
-    category: 'Office_Warehouse_Rent',
-    title: 'Mirpur Central Godown Rent',
-    amount: 35000,
-    payment_method: 'Bank',
-    entered_by_emp_id: 'ADM-01',
-    entered_by_name: 'Samin Yeasar',
-  },
-  {
-    id: 'e1000000-0000-0000-0000-000000000002',
-    expense_date: new Date().toISOString().split('T')[0],
-    category: 'Electricity_Internet',
-    title: 'DESCO Monthly Electric Bill & Fiber Net',
-    amount: 6800,
-    payment_method: 'bKash',
-    entered_by_emp_id: 'ACC-01',
-    entered_by_name: 'Nazrul Islam',
-  },
-  {
-    id: 'e1000000-0000-0000-0000-000000000003',
-    expense_date: new Date().toISOString().split('T')[0],
-    category: 'Delivery_Van_Fuel',
-    title: 'Delivery Van Fuel & CNG Refill',
-    amount: 3200,
-    payment_method: 'Cash',
-    entered_by_emp_id: 'DEL-01',
-    entered_by_name: 'Sohel Rana',
-  },
-  {
-    id: 'e1000000-0000-0000-0000-000000000004',
-    expense_date: new Date().toISOString().split('T')[0],
-    category: 'Staff_Tea_Entertainment',
-    title: 'Weekly Staff Tea & Office Refreshments',
-    amount: 1450,
-    payment_method: 'Cash',
-    entered_by_emp_id: 'STR-01',
-    entered_by_name: 'Abdur Rahim',
-  },
-];
+const initialExpenses: Expense[] = [];
 
-const initialAttendance: Attendance[] = [
-  { id: 'att-1', emp_id: 'ADM-01', work_date: '2026-11-03', status: 'Present_Office', ta_da_amount_earned: 500, employee_name: 'Samin Yeasar' },
-  { id: 'att-2', emp_id: 'EXE-01', work_date: '2026-11-03', status: 'Present_Office', ta_da_amount_earned: 600, employee_name: 'Dr. Rafiqul Islam' },
-  { id: 'att-3', emp_id: 'EMP-001', work_date: '2026-11-03', status: 'Present_Market_Duty', market_id: 'mkt-1', ta_da_amount_earned: 350, employee_name: 'Tanvir Hossain', market_name: 'Mirpur-10' },
-  { id: 'att-4', emp_id: 'EMP-002', work_date: '2026-11-03', status: 'Present_Market_Duty', market_id: 'mkt-2', ta_da_amount_earned: 350, employee_name: 'Shakib Al Hasan', market_name: 'Dhanmondi' },
-  { id: 'att-5', emp_id: 'EMP-003', work_date: '2026-11-03', status: 'Present_Market_Duty', market_id: 'mkt-3', ta_da_amount_earned: 350, employee_name: 'Mehedi Hasan', market_name: 'Uttara' },
-  { id: 'att-6', emp_id: 'EMP-004', work_date: '2026-11-03', status: 'Leave', ta_da_amount_earned: 0, employee_name: 'Rakibul Islam' },
-];
+const initialAttendance: Attendance[] = [];
 
-const initialTargets: EmployeeTarget[] = [
-  { id: 'tar-1', emp_id: 'EMP-001', month_year: '2026-11', target_sales_amount: 350000, achieved_sales_amount: 145000, target_collection_amount: 320000, achieved_collection_amount: 128000, employee_name: 'Tanvir Hossain' },
-  { id: 'tar-2', emp_id: 'EMP-002', month_year: '2026-11', target_sales_amount: 300000, achieved_sales_amount: 110000, target_collection_amount: 280000, achieved_collection_amount: 95000, employee_name: 'Shakib Al Hasan' },
-  { id: 'tar-3', emp_id: 'EMP-003', month_year: '2026-11', target_sales_amount: 280000, achieved_sales_amount: 84000, target_collection_amount: 260000, achieved_collection_amount: 72000, employee_name: 'Mehedi Hasan' },
-];
+const initialTargets: EmployeeTarget[] = [];
 
-const initialPayroll: Payroll[] = [
-  { id: 'pay-1', salary_month: '2026-10', emp_id: 'EMP-001', working_days: 26, base_salary: 28000, total_ta_da_earned: 9100, sales_commission_earned: 7500, festival_or_extra_bonus: 0, advance_salary_deducted: 2000, net_salary_payable: 42600, paid_amount: 42600, payment_status: 'Paid', paid_date: '2026-11-01', payment_method: 'Bank', employee_name: 'Tanvir Hossain', designation: 'Senior Sales Officer (MPO)' },
-  { id: 'pay-2', salary_month: '2026-10', emp_id: 'EMP-002', working_days: 25, base_salary: 26000, total_ta_da_earned: 8750, sales_commission_earned: 5400, festival_or_extra_bonus: 0, advance_salary_deducted: 0, net_salary_payable: 40150, paid_amount: 40150, payment_status: 'Paid', paid_date: '2026-11-01', payment_method: 'Bank', employee_name: 'Shakib Al Hasan', designation: 'Territory Sales Officer' },
-];
+const initialPayroll: Payroll[] = [];
 
 // IN-BROWSER PERSISTENT STORE CLASS
 class ERPStore {
@@ -623,6 +486,8 @@ class ERPStore {
         cloudAttendance,
         cloudPayroll,
         cloudLedger,
+        cloudSuppliers,
+        cloudCustomers,
       ] = await Promise.all([
         fetchFromCloud<Product>('products'),
         fetchFromCloud<Employee>('employees'),
@@ -635,6 +500,8 @@ class ERPStore {
         fetchFromCloud<Attendance>('attendance'),
         fetchFromCloud<Payroll>('payroll'),
         fetchFromCloud<LedgerEntry>('ledger'),
+        fetchFromCloud<Supplier>('suppliers'),
+        fetchFromCloud<Customer>('customers'),
       ]);
 
       let updatedAny = false;
@@ -681,6 +548,14 @@ class ERPStore {
       }
       if (cloudLedger && cloudLedger.length > 0) {
         this.ledger = cloudLedger;
+        updatedAny = true;
+      }
+      if (cloudSuppliers && cloudSuppliers.length > 0) {
+        this.suppliers = cloudSuppliers;
+        updatedAny = true;
+      }
+      if (cloudCustomers) {
+        this.customers = cloudCustomers;
         updatedAny = true;
       }
 
@@ -739,6 +614,21 @@ class ERPStore {
   private loadFromStorage() {
     if (this.initialized) return;
     try {
+      const CURRENT_STORAGE_VER = '2026_v4_clean';
+      if (typeof window !== 'undefined' && localStorage.getItem('senatix_storage_ver') !== CURRENT_STORAGE_VER) {
+        localStorage.removeItem('senatix_erp_customers');
+        localStorage.removeItem('senatix_erp_attendance');
+        localStorage.removeItem('senatix_erp_payroll');
+        localStorage.removeItem('senatix_erp_targets');
+        localStorage.removeItem('senatix_erp_expenses');
+        localStorage.removeItem('senatix_erp_emp_stock');
+        localStorage.removeItem('senatix_erp_invoices');
+        localStorage.removeItem('senatix_erp_ledger');
+        localStorage.removeItem('senatix_erp_suppliers');
+        localStorage.removeItem('senatix_erp_employees');
+        localStorage.setItem('senatix_storage_ver', CURRENT_STORAGE_VER);
+      }
+
       const get = (key: string) => {
         const item = localStorage.getItem(key);
         return item ? JSON.parse(item) : null;
@@ -812,10 +702,14 @@ class ERPStore {
 
     // Master/standard passwords accepted across the system
     const validMasterPasswords = [
+      'senatixadmin2026!',
+      'director2026@',
+      'manager2026@',
+      'accounts2026@',
+      'godownstore2026@',
       'senatix1234@',
       'saminsami1234',
       'senatix2026@',
-      'senatixadmin2026!',
     ];
 
     // STEP 1: Attempt Authentication via Supabase Auth (for customized email/password users created in Supabase Dashboard)
@@ -887,6 +781,9 @@ class ERPStore {
       cleanId === 'adm-01' ||
       cleanId === 'senatixwellness@gmail.com' ||
       cleanId === 'saminsami73@gmail.com' ||
+      cleanId === '01770578142' ||
+      cleanId === '+8801770578142' ||
+      cleanId === '8801770578142' ||
       cleanId === '01711000001' ||
       cleanId === 'samin' ||
       cleanId === 'admin';
@@ -894,13 +791,40 @@ class ERPStore {
     const isManagingDirector =
       cleanId === 'exe-01' ||
       cleanId === '01711000002' ||
-      cleanId === '01819000002';
+      cleanId === '+8801711000002' ||
+      cleanId === 'director';
+
+    const isOperationsManager =
+      cleanId === 'mgr-01' ||
+      cleanId === '01711000005' ||
+      cleanId === '+8801711000005' ||
+      cleanId === 'manager';
+
+    const isAccountant =
+      cleanId === 'acc-01' ||
+      cleanId === '01711000004' ||
+      cleanId === '+8801711000004' ||
+      cleanId === 'accounts' ||
+      cleanId === 'accountant';
+
+    const isStoreKeeper =
+      cleanId === 'str-01' ||
+      cleanId === '01711000003' ||
+      cleanId === '+8801711000003' ||
+      cleanId === 'store' ||
+      cleanId === 'storekeeper';
 
     let found: Employee | undefined;
     if (isSuperAdminIdentifier) {
       found = this.employees.find((e) => e.role === 'super_admin') || this.employees[0];
     } else if (isManagingDirector) {
       found = this.employees.find((e) => e.role === 'executor') || this.employees[1];
+    } else if (isOperationsManager) {
+      found = this.employees.find((e) => e.role === 'manager');
+    } else if (isAccountant) {
+      found = this.employees.find((e) => e.role === 'accountant');
+    } else if (isStoreKeeper) {
+      found = this.employees.find((e) => e.role === 'store_keeper');
     } else {
       found = this.employees.find(
         (e) =>
