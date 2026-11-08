@@ -2,29 +2,6 @@
 
 A production-ready, 60 FPS Distribution & ERP Web Application built for **Senatix Wellness** using **Next.js 14 (App Router)**, **React 18**, **TypeScript**, **Tailwind CSS**, and **Supabase (Free Tier)**.
 
----
-
-## 🌐 Live Access URLs
-
-The application is actively running on the host machine and is accessible across devices (PC, Mac, iOS, Android):
-
-- **Local Machine**: [http://localhost:3000](http://localhost:3000)
-- **Local Network (Wi-Fi / LAN for Phones & Tablets)**: [http://192.168.0.199:3000](http://192.168.0.199:3000)
-
----
-
-## 🔑 Mock Login & Quick Demo Access
-
-You can log into the application immediately without configuring Supabase credentials. Use the 1-Click Quick Demo buttons on the login card or enter:
-
-| Role | Employee ID | PIN / Password | Market Assigned |
-| :--- | :--- | :--- | :--- |
-| **Super Admin** | `ADM-01` | `1234` | Head Office |
-| **Managing Director / Executor** | `EXE-01` | `1234` | Central Operations |
-| **Store & Warehouse Keeper** | `STR-01` | `1234` | Central Warehouse |
-| **Field Sales Officer (MPO)** | `EMP-001` | `1234` | Mirpur-10 Territory |
-
----
 
 ## 🚀 Key Features Implemented
 
