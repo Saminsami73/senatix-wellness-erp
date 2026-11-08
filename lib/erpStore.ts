@@ -21,15 +21,10 @@ import {
   DoctorExpense,
 } from '@/types/erp';
 import { isSupabaseConfigured, fetchFromCloud, syncRecordToCloud, deleteRecordFromCloud, generateUUID, supabase } from '@/lib/supabase';
+import { broadcastLiveAlert } from '@/lib/realtimeAlerts';
 
-// SEED DATA FOR IMMEDIATE OUT-OF-THE-BOX OPERATION
-const initialMarkets: Market[] = [
-  { id: 'mkt-1', market_code: 'MKT-01', name: 'Mirpur-10 Territory', area_zone: 'Dhaka North', delivery_days: 'Sat, Mon, Wed', is_active: true },
-  { id: 'mkt-2', market_code: 'MKT-02', name: 'Dhanmondi Medical Zone', area_zone: 'Dhaka South', delivery_days: 'Sun, Tue, Thu', is_active: true },
-  { id: 'mkt-3', market_code: 'MKT-03', name: 'Uttara Sector Route', area_zone: 'Dhaka North', delivery_days: 'Everyday', is_active: true },
-  { id: 'mkt-4', market_code: 'MKT-04', name: 'Mohakhali & Gulshan', area_zone: 'Dhaka North', delivery_days: 'Mon, Wed, Fri', is_active: true },
-  { id: 'mkt-5', market_code: 'MKT-05', name: 'Savar Pharma Belt', area_zone: 'Dhaka Outskirts', delivery_days: 'Sun, Wed', is_active: true },
-];
+// CLEAN INITIAL PRODUCTION DATA (ZERO DEMO RECORDS)
+const initialMarkets: Market[] = [];
 
 const initialEmployees: Employee[] = [
   {
@@ -39,7 +34,7 @@ const initialEmployees: Employee[] = [
     designation: 'Chief Executive Officer & Super Admin',
     role: 'super_admin',
     joining_date: '2023-01-01',
-    primary_market_id: 'mkt-1',
+    primary_market_id: null,
     base_salary: 80000,
     daily_ta_da: 500,
     commission_percent: 2.0,
@@ -54,7 +49,7 @@ const initialEmployees: Employee[] = [
     designation: 'Managing Director',
     role: 'executor',
     joining_date: '2023-01-01',
-    primary_market_id: 'mkt-2',
+    primary_market_id: null,
     base_salary: 120000,
     daily_ta_da: 600,
     commission_percent: 3.0,
@@ -69,7 +64,7 @@ const initialEmployees: Employee[] = [
     designation: 'Chief Operations Manager',
     role: 'manager',
     joining_date: '2023-03-15',
-    primary_market_id: 'mkt-3',
+    primary_market_id: null,
     base_salary: 60000,
     daily_ta_da: 400,
     commission_percent: 1.5,
@@ -107,311 +102,19 @@ const initialEmployees: Employee[] = [
     salary_advance_balance: 0,
     is_active: true,
   },
-  {
-    emp_id: 'EMP-001',
-    name: 'Tanvir Hossain',
-    phone: '01712000001',
-    designation: 'Senior Sales Officer (MPO)',
-    role: 'sales_rep',
-    joining_date: '2023-06-01',
-    primary_market_id: 'mkt-1',
-    base_salary: 24000,
-    daily_ta_da: 350,
-    commission_percent: 2.5,
-    current_due_balance: 0,
-    salary_advance_balance: 0,
-    is_active: true,
-  },
-  {
-    emp_id: 'EMP-002',
-    name: 'Shakib Al Hasan',
-    phone: '01712000002',
-    designation: 'Medical Sales Executive',
-    role: 'sales_rep',
-    joining_date: '2023-07-15',
-    primary_market_id: 'mkt-2',
-    base_salary: 22000,
-    daily_ta_da: 350,
-    commission_percent: 2.0,
-    current_due_balance: 0,
-    salary_advance_balance: 0,
-    is_active: true,
-  },
-  {
-    emp_id: 'EMP-003',
-    name: 'Kamrul Hasan',
-    phone: '01712000003',
-    designation: 'Territory Officer',
-    role: 'sales_rep',
-    joining_date: '2023-08-01',
-    primary_market_id: 'mkt-3',
-    base_salary: 20000,
-    daily_ta_da: 350,
-    commission_percent: 2.0,
-    current_due_balance: 0,
-    salary_advance_balance: 0,
-    is_active: true,
-  },
-  {
-    emp_id: 'DEL-01',
-    name: 'Rubel Mia',
-    phone: '01713000001',
-    designation: 'Delivery Van Driver',
-    role: 'sales_rep',
-    joining_date: '2023-10-01',
-    primary_market_id: 'mkt-5',
-    base_salary: 18000,
-    daily_ta_da: 350,
-    commission_percent: 1.5,
-    current_due_balance: 0,
-    salary_advance_balance: 0,
-    is_active: true,
-  },
 ];
 
 const initialCustomers: Customer[] = [];
 
-const initialSuppliers: Supplier[] = [
-  {
-    id: 'b0000000-0000-0000-0000-000000000001',
-    name: 'Senatix Pharma Factory Unit-1',
-    contact_person: 'Engr. Mahbubul Alam',
-    phone: '01819000001',
-    address: 'Tongi I/A, Gazipur',
-    payable_balance: 0,
-    is_active: true,
-  },
-  {
-    id: 'b0000000-0000-0000-0000-000000000002',
-    name: 'Square Formulations Lab',
-    contact_person: 'Dr. Saiful Islam',
-    phone: '01819000002',
-    address: 'Pabna Plant',
-    payable_balance: 0,
-    is_active: true,
-  },
-  {
-    id: 'b0000000-0000-0000-0000-000000000003',
-    name: 'Apex Sterile Healthcare',
-    contact_person: 'Farhan Kabir',
-    phone: '01819000003',
-    address: 'Bhaluka, Mymensingh',
-    payable_balance: 0,
-    is_active: true,
-  },
-];
+const initialSuppliers: Supplier[] = [];
 
-const initialDoctors: Doctor[] = [
-  {
-    id: 'f0000000-0000-0000-0000-000000000001',
-    doctor_code: 'DOC-001',
-    name: 'Prof. Dr. A. K. Azad',
-    degrees: 'MBBS, FCPS, MD (Cardiology)',
-    specialty: 'Cardiologist',
-    hospital_chamber: 'National Heart Foundation, Mirpur',
-    phone: '01711223344',
-    assigned_emp_id: 'EMP-001',
-    prescriptions_written_monthly: 145,
-    total_promotional_expense: 12500,
-    prescribed_products: ['Normopress 5mg', 'Cardizem-SR 90'],
-    is_active: true,
-  },
-  {
-    id: 'f0000000-0000-0000-0000-000000000002',
-    doctor_code: 'DOC-002',
-    name: 'Dr. Farzana Rahman',
-    degrees: 'MBBS, DGO, MCPS',
-    specialty: 'Gynecologist',
-    hospital_chamber: 'Popular Diagnostic Center, Dhanmondi',
-    phone: '01711556677',
-    assigned_emp_id: 'EMP-002',
-    prescriptions_written_monthly: 110,
-    total_promotional_expense: 8500,
-    prescribed_products: ['Senacal-D Plus', 'Neurobex-M'],
-    is_active: true,
-  },
-  {
-    id: 'f0000000-0000-0000-0000-000000000003',
-    doctor_code: 'DOC-003',
-    name: 'Dr. Mahmudul Hasan',
-    degrees: 'MBBS, MD (Gastroenterology)',
-    specialty: 'Gastroenterologist',
-    hospital_chamber: 'Ibn Sina Medical, Dhanmondi',
-    phone: '01711889900',
-    assigned_emp_id: 'EMP-002',
-    prescriptions_written_monthly: 180,
-    total_promotional_expense: 15000,
-    prescribed_products: ['Gastroloc 20mg'],
-    is_active: true,
-  },
-  {
-    id: 'f0000000-0000-0000-0000-000000000004',
-    doctor_code: 'DOC-004',
-    name: 'Dr. Nusrat Jahan',
-    degrees: 'MBBS, DDV (Dermatology)',
-    specialty: 'Dermatologist',
-    hospital_chamber: 'Labaid Hospital, Uttara',
-    phone: '01711334455',
-    assigned_emp_id: 'EMP-003',
-    prescriptions_written_monthly: 75,
-    total_promotional_expense: 4200,
-    prescribed_products: ['Dermasil Ointment'],
-    is_active: true,
-  },
-];
+const initialDoctors: Doctor[] = [];
 
 const initialDoctorExpenses: DoctorExpense[] = [];
 
-const initialProducts: Product[] = [
-  {
-    id: 'c0000000-0000-0000-0000-000000000001',
-    sku_code: 'MED-001',
-    name: 'Normopress 5mg',
-    generic_name: 'Amlodipine Besilate',
-    category: 'Tablet',
-    strength: '5mg',
-    pack_size: '10 x 10 Strip Box',
-    stock: 320,
-    low_stock_alert_level: 50,
-    cost_price_dp: 120.00,
-    trade_price_tp: 160.00,
-    mrp: 200.00,
-    bonus_buy_qty: 10,
-    bonus_free_qty: 1,
-    is_active: true,
-  },
-  {
-    id: 'c0000000-0000-0000-0000-000000000002',
-    sku_code: 'MED-002',
-    name: 'Senacal-D Plus',
-    generic_name: 'Calcium Orotate + Vit D3',
-    category: 'Tablet',
-    strength: '400mg + 400IU',
-    pack_size: '3 x 10 Strip Box',
-    stock: 210,
-    low_stock_alert_level: 40,
-    cost_price_dp: 180.00,
-    trade_price_tp: 240.00,
-    mrp: 300.00,
-    bonus_buy_qty: 10,
-    bonus_free_qty: 1,
-    is_active: true,
-  },
-  {
-    id: 'c0000000-0000-0000-0000-000000000003',
-    sku_code: 'MED-003',
-    name: 'Gastroloc 20mg',
-    generic_name: 'Esomeprazole Magnesium',
-    category: 'Capsule',
-    strength: '20mg',
-    pack_size: '10 x 10 Alu-Alu Box',
-    stock: 450,
-    low_stock_alert_level: 100,
-    cost_price_dp: 210.00,
-    trade_price_tp: 280.00,
-    mrp: 350.00,
-    bonus_buy_qty: 20,
-    bonus_free_qty: 2,
-    is_active: true,
-  },
-  {
-    id: 'c0000000-0000-0000-0000-000000000004',
-    sku_code: 'MED-004',
-    name: 'Ceftrix 1g IV/IM',
-    generic_name: 'Ceftriaxone Sodium',
-    category: 'Injection',
-    strength: '1g',
-    pack_size: '1 Vial',
-    stock: 95,
-    low_stock_alert_level: 30,
-    cost_price_dp: 110.00,
-    trade_price_tp: 150.00,
-    mrp: 185.00,
-    bonus_buy_qty: 0,
-    bonus_free_qty: 0,
-    is_active: true,
-  },
-  {
-    id: 'c0000000-0000-0000-0000-000000000005',
-    sku_code: 'MED-005',
-    name: 'Dermasil Ointment',
-    generic_name: 'Clobetasol Propionate',
-    category: 'Ointment',
-    strength: '0.05% w/w',
-    pack_size: '20g Tube Box',
-    stock: 160,
-    low_stock_alert_level: 30,
-    cost_price_dp: 45.00,
-    trade_price_tp: 65.00,
-    mrp: 85.00,
-    bonus_buy_qty: 10,
-    bonus_free_qty: 1,
-    is_active: true,
-  },
-  {
-    id: 'c0000000-0000-0000-0000-000000000006',
-    sku_code: 'MED-006',
-    name: 'Neurobex-M',
-    generic_name: 'Vit B1 + B6 + B12',
-    category: 'Tablet',
-    strength: 'Standard',
-    pack_size: '10 x 10 Strip Box',
-    stock: 280,
-    low_stock_alert_level: 50,
-    cost_price_dp: 140.00,
-    trade_price_tp: 190.00,
-    mrp: 240.00,
-    bonus_buy_qty: 10,
-    bonus_free_qty: 1,
-    is_active: true,
-  },
-  {
-    id: 'c0000000-0000-0000-0000-000000000007',
-    sku_code: 'MED-007',
-    name: 'Senatix Vitamin C 500mg',
-    generic_name: 'Ascorbic Acid',
-    category: 'Chewable',
-    strength: '500mg',
-    pack_size: '10 x 10 Orange Chewable',
-    stock: 520,
-    low_stock_alert_level: 80,
-    cost_price_dp: 60.00,
-    trade_price_tp: 85.00,
-    mrp: 110.00,
-    bonus_buy_qty: 15,
-    bonus_free_qty: 2,
-    is_active: true,
-  },
-  {
-    id: 'c0000000-0000-0000-0000-000000000008',
-    sku_code: 'MED-008',
-    name: 'Cardizem-SR 90',
-    generic_name: 'Diltiazem HCl',
-    category: 'Capsule',
-    strength: '90mg',
-    pack_size: '3 x 10 Strip Box',
-    stock: 140,
-    low_stock_alert_level: 30,
-    cost_price_dp: 160.00,
-    trade_price_tp: 220.00,
-    mrp: 275.00,
-    bonus_buy_qty: 10,
-    bonus_free_qty: 1,
-    is_active: true,
-  },
-];
+const initialProducts: Product[] = [];
 
-const initialBatches: ProductBatch[] = [
-  { id: 'd0000000-0000-0000-0000-000000000001', product_id: 'c0000000-0000-0000-0000-000000000001', batch_no: 'NP-25A01', mfg_date: '2025-01-10', exp_date: '2027-01-09', cost_price_dp: 120, trade_price_tp: 160, mrp: 200, warehouse_qty: 220, is_active: true },
-  { id: 'd0000000-0000-0000-0000-000000000002', product_id: 'c0000000-0000-0000-0000-000000000001', batch_no: 'NP-25B02', mfg_date: '2025-03-01', exp_date: '2027-02-28', cost_price_dp: 120, trade_price_tp: 160, mrp: 200, warehouse_qty: 100, is_active: true },
-  { id: 'd0000000-0000-0000-0000-000000000003', product_id: 'c0000000-0000-0000-0000-000000000002', batch_no: 'SC-24K11', mfg_date: '2024-11-15', exp_date: '2026-11-14', cost_price_dp: 180, trade_price_tp: 240, mrp: 300, warehouse_qty: 210, is_active: true },
-  { id: 'd0000000-0000-0000-0000-000000000004', product_id: 'c0000000-0000-0000-0000-000000000003', batch_no: 'GL-25C03', mfg_date: '2025-02-01', exp_date: '2027-01-31', cost_price_dp: 210, trade_price_tp: 280, mrp: 350, warehouse_qty: 450, is_active: true },
-  { id: 'd0000000-0000-0000-0000-000000000005', product_id: 'c0000000-0000-0000-0000-000000000004', batch_no: 'CF-24J09', mfg_date: '2024-10-01', exp_date: '2026-09-30', cost_price_dp: 110, trade_price_tp: 150, mrp: 185, warehouse_qty: 95, is_active: true },
-  { id: 'd0000000-0000-0000-0000-000000000006', product_id: 'c0000000-0000-0000-0000-000000000005', batch_no: 'DM-24L02', mfg_date: '2024-12-01', exp_date: '2026-11-30', cost_price_dp: 45, trade_price_tp: 65, mrp: 85, warehouse_qty: 160, is_active: true },
-  { id: 'd0000000-0000-0000-0000-000000000007', product_id: 'c0000000-0000-0000-0000-000000000006', batch_no: 'NB-25B01', mfg_date: '2025-02-15', exp_date: '2027-02-14', cost_price_dp: 140, trade_price_tp: 190, mrp: 240, warehouse_qty: 280, is_active: true },
-  { id: 'd0000000-0000-0000-0000-000000000008', product_id: 'c0000000-0000-0000-0000-000000000007', batch_no: 'VC-25A05', mfg_date: '2025-01-05', exp_date: '2026-12-31', cost_price_dp: 60, trade_price_tp: 85, mrp: 110, warehouse_qty: 520, is_active: true },
-  { id: 'd0000000-0000-0000-0000-000000000009', product_id: 'c0000000-0000-0000-0000-000000000008', batch_no: 'CD-25A02', mfg_date: '2025-01-20', exp_date: '2027-01-19', cost_price_dp: 160, trade_price_tp: 220, mrp: 275, warehouse_qty: 140, is_active: true },
-];
+const initialBatches: ProductBatch[] = [];
 
 const initialEmpStock: EmpStock[] = [];
 
@@ -506,7 +209,7 @@ class ERPStore {
 
       let updatedAny = false;
 
-      if (cloudProducts && cloudProducts.length > 0) {
+      if (cloudProducts !== null) {
         this.products = cloudProducts;
         updatedAny = true;
       }
@@ -514,47 +217,47 @@ class ERPStore {
         this.employees = cloudEmployees;
         updatedAny = true;
       }
-      if (cloudBatches && cloudBatches.length > 0) {
+      if (cloudBatches !== null) {
         this.batches = cloudBatches;
         updatedAny = true;
       }
-      if (cloudEmpStock && cloudEmpStock.length > 0) {
+      if (cloudEmpStock !== null) {
         this.empStock = cloudEmpStock;
         updatedAny = true;
       }
-      if (cloudInvoices && cloudInvoices.length > 0) {
+      if (cloudInvoices !== null) {
         this.invoices = cloudInvoices;
         updatedAny = true;
       }
-      if (cloudExpenses && cloudExpenses.length > 0) {
+      if (cloudExpenses !== null) {
         this.expenses = cloudExpenses;
         updatedAny = true;
       }
-      if (cloudDoctors && cloudDoctors.length > 0) {
+      if (cloudDoctors !== null) {
         this.doctors = cloudDoctors;
         updatedAny = true;
       }
-      if (cloudDoctorExpenses && cloudDoctorExpenses.length > 0) {
+      if (cloudDoctorExpenses !== null) {
         this.doctorExpenses = cloudDoctorExpenses;
         updatedAny = true;
       }
-      if (cloudAttendance && cloudAttendance.length > 0) {
+      if (cloudAttendance !== null) {
         this.attendance = cloudAttendance;
         updatedAny = true;
       }
-      if (cloudPayroll && cloudPayroll.length > 0) {
+      if (cloudPayroll !== null) {
         this.payroll = cloudPayroll;
         updatedAny = true;
       }
-      if (cloudLedger && cloudLedger.length > 0) {
+      if (cloudLedger !== null) {
         this.ledger = cloudLedger;
         updatedAny = true;
       }
-      if (cloudSuppliers && cloudSuppliers.length > 0) {
+      if (cloudSuppliers !== null) {
         this.suppliers = cloudSuppliers;
         updatedAny = true;
       }
-      if (cloudCustomers) {
+      if (cloudCustomers !== null) {
         this.customers = cloudCustomers;
         updatedAny = true;
       }
@@ -614,8 +317,13 @@ class ERPStore {
   private loadFromStorage() {
     if (this.initialized) return;
     try {
-      const CURRENT_STORAGE_VER = '2026_v4_clean';
+      const CURRENT_STORAGE_VER = '2026_v5_pure_production';
       if (typeof window !== 'undefined' && localStorage.getItem('senatix_storage_ver') !== CURRENT_STORAGE_VER) {
+        localStorage.removeItem('senatix_erp_products');
+        localStorage.removeItem('senatix_erp_batches');
+        localStorage.removeItem('senatix_erp_doctors');
+        localStorage.removeItem('senatix_erp_doctor_expenses');
+        localStorage.removeItem('senatix_erp_markets');
         localStorage.removeItem('senatix_erp_customers');
         localStorage.removeItem('senatix_erp_attendance');
         localStorage.removeItem('senatix_erp_payroll');
@@ -962,6 +670,14 @@ class ERPStore {
     syncRecordToCloud('employees', emp);
     syncRecordToCloud('ledger', newLedger);
 
+    broadcastLiveAlert({
+      type: 'cash',
+      title: `ফিল্ড ক্যাশ জমা: ${voucherRef}`,
+      title_bn: `ফিল্ড ক্যাশ জমা: ${voucherRef}`,
+      description: `${emp.name} ৳${params.amount.toLocaleString()} জমা দিয়েছেন (${params.payment_method})। অবশিষ্ট বকেয়া: ৳${emp.current_due_balance.toLocaleString()}`,
+      description_bn: `${emp.name} ৳${params.amount.toLocaleString()} জমা দিয়েছেন (${params.payment_method})। অবশিষ্ট বকেয়া: ৳${emp.current_due_balance.toLocaleString()}`,
+    });
+
     return {
       success: true,
       balanceRemaining: emp.current_due_balance,
@@ -1073,6 +789,15 @@ class ERPStore {
     this.doctors.unshift(newDoc);
     this.saveToStorage();
     syncRecordToCloud('doctors', newDoc);
+
+    broadcastLiveAlert({
+      type: 'doctor',
+      title: `নতুন ডাক্তার তালিকাভুক্ত: ${newDoc.name}`,
+      title_bn: `নতুন ডাক্তার তালিকাভুক্ত: ${newDoc.name}`,
+      description: `${newDoc.name} (${newDoc.specialty}) সিস্টেমে যুক্ত হয়েছেন। চেম্বার: ${newDoc.hospital_chamber}`,
+      description_bn: `${newDoc.name} (${newDoc.specialty}) সিস্টেমে যুক্ত হয়েছেন। চেম্বার: ${newDoc.hospital_chamber}`,
+    });
+
     return newDoc;
   }
 
@@ -1153,6 +878,15 @@ class ERPStore {
 
     this.saveToStorage();
     syncRecordToCloud('doctor_expenses', newExpense);
+
+    broadcastLiveAlert({
+      type: 'expense',
+      title: 'ডাক্তার প্রমোশনাল ব্যয় লিপিবদ্ধ',
+      title_bn: 'ডাক্তার প্রমোশনাল ব্যয় লিপিবদ্ধ',
+      description: `${doc?.name || 'ডাক্তার'}-এর জন্য ৳${newExpense.amount.toLocaleString()} ব্যয় রেকর্ড হয়েছে (${newExpense.title})।`,
+      description_bn: `${doc?.name || 'ডাক্তার'}-এর জন্য ৳${newExpense.amount.toLocaleString()} ব্যয় রেকর্ড হয়েছে (${newExpense.title})।`,
+    });
+
     return newExpense;
   }
 
@@ -1180,6 +914,15 @@ class ERPStore {
     this.products.push(newProd);
     this.saveToStorage();
     syncRecordToCloud('products', newProd);
+
+    broadcastLiveAlert({
+      type: 'product',
+      title: `নতুন ওষুধ যোগ করা হয়েছে: ${newProd.name}`,
+      title_bn: `নতুন ওষুধ যোগ করা হয়েছে: ${newProd.name}`,
+      description: `${newProd.name} (${newProd.sku_code}) সফলভাবে সিস্টেমে যুক্ত হয়েছে।`,
+      description_bn: `${newProd.name} (${newProd.sku_code}) সফলভাবে সিস্টেমে যুক্ত হয়েছে।`,
+    });
+
     return newProd;
   }
 
@@ -1215,6 +958,16 @@ class ERPStore {
     this.batches.push(newBatch);
     this.saveToStorage();
     syncRecordToCloud('product_batches', newBatch);
+
+    const prod = this.products.find((p) => p.id === batch.product_id);
+    broadcastLiveAlert({
+      type: 'stock',
+      title: `নতুন ব্যাচ স্টক ইন: ${prod?.name || 'ওষুধ'}`,
+      title_bn: `নতুন ব্যাচ স্টক ইন: ${prod?.name || 'ওষুধ'}`,
+      description: `ব্যাচ #${newBatch.batch_no} (পরিমাণ: ${newBatch.warehouse_qty} পিস) সেন্ট্রাল গোডাউনে গৃহীত হয়েছে।`,
+      description_bn: `ব্যাচ #${newBatch.batch_no} (পরিমাণ: ${newBatch.warehouse_qty} পিস) সেন্ট্রাল গোডাউনে গৃহীত হয়েছে।`,
+    });
+
     return newBatch;
   }
 
@@ -1308,6 +1061,16 @@ class ERPStore {
     syncRecordToCloud('product_batches', batch);
     syncRecordToCloud('emp_stock', targetEmpStock);
     syncRecordToCloud('stock_transfers', newTransfer);
+
+    const prod = this.products.find((p) => p.id === productId);
+    const emp = this.employees.find((e) => e.emp_id === empId);
+    broadcastLiveAlert({
+      type: 'stock',
+      title: 'ফিল্ডে ওষুধ স্টক বিতরণ',
+      title_bn: 'ফিল্ডে ওষুধ স্টক বিতরণ',
+      description: `${emp?.name || empId}-কে ${prod?.name || 'ওষুধ'} ${qty} পিস হস্তান্তর করা হয়েছে (${newTransfer.transfer_ref})।`,
+      description_bn: `${emp?.name || empId}-কে ${prod?.name || 'ওষুধ'} ${qty} পিস হস্তান্তর করা হয়েছে (${newTransfer.transfer_ref})।`,
+    });
   }
 
   public transferStockBackToWarehouse(empId: string, productId: string, batchId: string, qty: number) {
@@ -1341,6 +1104,16 @@ class ERPStore {
     syncRecordToCloud('emp_stock', existing);
     if (batch) syncRecordToCloud('product_batches', batch);
     syncRecordToCloud('stock_transfers', newTransfer);
+
+    const prod = this.products.find((p) => p.id === productId);
+    const emp = this.employees.find((e) => e.emp_id === empId);
+    broadcastLiveAlert({
+      type: 'stock',
+      title: 'গোডাউনে স্টক ফেরত গৃহীত',
+      title_bn: 'গোডাউনে স্টক ফেরত গৃহীত',
+      description: `${emp?.name || empId}-এর নিকট হতে ${prod?.name || 'ওষুধ'} ${qty} পিস সেন্ট্রাল গোডাউনে গৃহীত হয়েছে (${newTransfer.transfer_ref})।`,
+      description_bn: `${emp?.name || empId}-এর নিকট হতে ${prod?.name || 'ওষুধ'} ${qty} পিস সেন্ট্রাল গোডাউনে গৃহীত হয়েছে (${newTransfer.transfer_ref})।`,
+    });
   }
 
   // POS BILLING & ORDERS (ATOMIC TRANSACTION)
@@ -1540,6 +1313,14 @@ class ERPStore {
         total_price: item.total_price,
         payment_status: newInvoice.payment_status,
       });
+    });
+
+    broadcastLiveAlert({
+      type: 'invoice',
+      title: `নতুন বিক্রয় ইনভয়েস: ${newInvoice.invoice_ref}`,
+      title_bn: `নতুন বিক্রয় ইনভয়েস: ${newInvoice.invoice_ref}`,
+      description: `${resolvedCustomerName}-এর জন্য ৳${newInvoice.net_payable.toLocaleString()} টাকার বিল নিশ্চিত হয়েছে (আদায়: ৳${newInvoice.paid_amount.toLocaleString()})।`,
+      description_bn: `${resolvedCustomerName}-এর জন্য ৳${newInvoice.net_payable.toLocaleString()} টাকার বিল নিশ্চিত হয়েছে (আদায়: ৳${newInvoice.paid_amount.toLocaleString()})।`,
     });
 
     return newInvoice;
@@ -1754,6 +1535,15 @@ class ERPStore {
     this.expenses.unshift(newExp);
     this.saveToStorage();
     syncRecordToCloud('expenses', newExp);
+
+    broadcastLiveAlert({
+      type: 'expense',
+      title: `নতুন অফিস ব্যয়: ${newExp.title}`,
+      title_bn: `নতুন অফিস ব্যয়: ${newExp.title}`,
+      description: `৳${newExp.amount.toLocaleString()} ব্যয় লিপিবদ্ধ হয়েছে (${newExp.category} - ${newExp.payment_method})।`,
+      description_bn: `৳${newExp.amount.toLocaleString()} ব্যয় লিপিবদ্ধ হয়েছে (${newExp.category} - ${newExp.payment_method})।`,
+    });
+
     return newExp;
   }
 

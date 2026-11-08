@@ -19,6 +19,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { ProductBatch } from '@/types/erp';
+import { broadcastLiveAlert } from '@/lib/realtimeAlerts';
 
 interface LiveNotificationCenterProps {
   nearExpiryBatches?: ProductBatch[];
@@ -42,6 +43,16 @@ export function LiveNotificationCenter({ nearExpiryBatches = [] }: LiveNotificat
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  const handleSendTestNotification = () => {
+    broadcastLiveAlert({
+      type: 'invoice',
+      title: 'Live Realtime Cloud Active',
+      title_bn: 'রিয়েল-টাইম নোটিফিকেশন সচল',
+      description: 'System WebSocket alert received successfully with sound & toast.',
+      description_bn: 'ক্লাউড নোটিফিকেশন ও সাউন্ড অ্যালার্ট সম্পূর্ণ ১০০% ফ্রি ও সক্রিয়ভাবে কাজ করছে।',
+    });
+  };
 
   if (!isMounted) {
     return (
@@ -112,6 +123,15 @@ export function LiveNotificationCenter({ nearExpiryBatches = [] }: LiveNotificat
               </div>
 
               <div className="flex items-center space-x-2">
+                <button
+                  type="button"
+                  onClick={handleSendTestNotification}
+                  className="px-2.5 py-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 text-[11px] font-semibold flex items-center space-x-1 transition-colors cursor-pointer"
+                  title={mode === 'bn' ? 'নোটিফিকেশন ও সাউন্ড টেস্ট করুন' : 'Test Realtime Notification'}
+                >
+                  <Sparkles className="size-3.5" />
+                  <span>{mode === 'bn' ? 'টেস্ট নোটিফিকেশন' : 'Test Alert'}</span>
+                </button>
                 <button
                   type="button"
                   onClick={() => setSoundEnabled(!soundEnabled)}
@@ -186,6 +206,14 @@ export function LiveNotificationCenter({ nearExpiryBatches = [] }: LiveNotificat
                         ? 'নতুন কোনো চালান, ক্যাশ জমা বা স্টক ট্রান্সফার হলে তাৎক্ষণিক শব্দসহ এখানে চলে আসবে।'
                         : 'Real-time invoices, cash receipts, and stock changes appear here automatically.'}
                     </p>
+                    <button
+                      type="button"
+                      onClick={handleSendTestNotification}
+                      className="mt-3.5 px-3.5 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-xl text-xs font-semibold inline-flex items-center space-x-1.5 transition-colors cursor-pointer border border-[#252628]"
+                    >
+                      <Sparkles className="size-3.5 text-emerald-400" />
+                      <span>{mode === 'bn' ? 'একটি টেস্ট অ্যালার্ট বাজিয়ে দেখুন' : 'Try a Test Alert'}</span>
+                    </button>
                   </div>
                 ) : (
                   notifications.map((n) => (

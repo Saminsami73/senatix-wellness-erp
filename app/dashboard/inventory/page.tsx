@@ -332,66 +332,114 @@ function InventoryContent() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#252628]">
-                {filteredProducts.map((p) => (
-                  <tr key={p.id} className="hover:bg-[#1f2026] transition-colors">
-                    <td className="p-3">
-                      <SmartAvatar
-                        imageUrl={p.image_url}
-                        name={p.name}
-                        type="product"
-                        category={p.category}
-                        size="md"
-                      />
-                    </td>
-                    <td className="p-3">
-                      <div className="font-semibold text-white">{p.name}</div>
-                      <div className="text-[11px] text-zinc-400">{p.generic_name}</div>
-                      <div className="text-[10px] text-zinc-500">{p.sku_code}</div>
-                    </td>
-                    <td className="p-3">
-                      <span className="px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 text-[11px]">
-                        {p.category}
-                      </span>
-                      <div className="text-[11px] text-zinc-400 mt-1">{p.pack_size}</div>
-                    </td>
-                    <td className="p-3 text-right font-medium text-zinc-300">
-                      ৳ {p.cost_price_dp.toFixed(2)}
-                    </td>
-                    <td className="p-3 text-right font-bold text-emerald-400">
-                      ৳ {p.trade_price_tp.toFixed(2)}
-                    </td>
-                    <td className="p-3 text-right text-zinc-400">
-                      ৳ {p.mrp.toFixed(2)}
-                    </td>
-                    <td className="p-3 text-center">
-                      {p.bonus_buy_qty > 0 ? (
-                        <span className="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold">
-                          {p.bonus_buy_qty}+{p.bonus_free_qty}
-                        </span>
-                      ) : (
-                        <span className="text-zinc-500">-</span>
-                      )}
-                    </td>
-                    <td className="p-3 text-center">
-                      <span
-                        className={`px-2.5 py-1 rounded-full text-xs font-bold ${
-                          p.stock <= p.low_stock_alert_level
-                            ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
-                            : 'bg-emerald-500/20 text-emerald-300'
-                        }`}
-                      >
-                        {p.stock} বক্স
-                      </span>
+                {filteredProducts.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="p-12 text-center">
+                      <div className="max-w-md mx-auto space-y-3">
+                        <div className="w-12 h-12 mx-auto rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                          <Package className="w-6 h-6" />
+                        </div>
+                        <h3 className="text-base font-semibold text-white">
+                          {mode === 'bn' ? 'কোনো ওষুধ এখনও তালিকাভুক্ত হয়নি' : 'No Medicines Added Yet'}
+                        </h3>
+                        <p className="text-xs text-zinc-400">
+                          {mode === 'bn'
+                            ? 'ডেমো ডেটা সফলভাবে সরানো হয়েছে। আপনার বাণিজ্যিক ব্যবহারের জন্য প্রথম আসল ওষুধ যুক্ত করতে নিচের বাটনে চাপ দিন।'
+                            : 'All demo items removed. Click below to add your first commercial product.'}
+                        </p>
+                        <button
+                          onClick={() => setShowAddProductModal(true)}
+                          className="inline-flex items-center space-x-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold transition-colors shadow-lg shadow-emerald-900/30"
+                        >
+                          <Plus className="w-4 h-4" />
+                          <span>{mode === 'bn' ? 'নতুন ওষুধ যোগ করুন' : 'Add First Medicine'}</span>
+                        </button>
+                      </div>
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  filteredProducts.map((p) => (
+                    <tr key={p.id} className="hover:bg-[#1f2026] transition-colors">
+                      <td className="p-3">
+                        <SmartAvatar
+                          imageUrl={p.image_url}
+                          name={p.name}
+                          type="product"
+                          category={p.category}
+                          size="md"
+                        />
+                      </td>
+                      <td className="p-3">
+                        <div className="font-semibold text-white">{p.name}</div>
+                        <div className="text-[11px] text-zinc-400">{p.generic_name}</div>
+                        <div className="text-[10px] text-zinc-500">{p.sku_code}</div>
+                      </td>
+                      <td className="p-3">
+                        <span className="px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 text-[11px]">
+                          {p.category}
+                        </span>
+                        <div className="text-[11px] text-zinc-400 mt-1">{p.pack_size}</div>
+                      </td>
+                      <td className="p-3 text-right font-medium text-zinc-300">
+                        ৳ {p.cost_price_dp.toFixed(2)}
+                      </td>
+                      <td className="p-3 text-right font-bold text-emerald-400">
+                        ৳ {p.trade_price_tp.toFixed(2)}
+                      </td>
+                      <td className="p-3 text-right text-zinc-400">
+                        ৳ {p.mrp.toFixed(2)}
+                      </td>
+                      <td className="p-3 text-center">
+                        {p.bonus_buy_qty > 0 ? (
+                          <span className="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold">
+                            {p.bonus_buy_qty}+{p.bonus_free_qty}
+                          </span>
+                        ) : (
+                          <span className="text-zinc-500">-</span>
+                        )}
+                      </td>
+                      <td className="p-3 text-center">
+                        <span
+                          className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+                            p.stock <= p.low_stock_alert_level
+                              ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                              : 'bg-emerald-500/20 text-emerald-300'
+                          }`}
+                        >
+                          {p.stock} বক্স
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
 
           {/* Mobile Cards View */}
           <div className="md:hidden space-y-2.5">
-            {filteredProducts.map((p) => (
+            {filteredProducts.length === 0 ? (
+              <div className="p-8 text-center bg-[#1b1c20] rounded-xl border border-[#252628] space-y-3">
+                <div className="w-12 h-12 mx-auto rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                  <Package className="w-6 h-6" />
+                </div>
+                <h3 className="text-sm font-semibold text-white">
+                  {mode === 'bn' ? 'কোনো ওষুধ এখনও যুক্ত হয়নি' : 'No Medicines Yet'}
+                </h3>
+                <p className="text-xs text-zinc-400">
+                  {mode === 'bn'
+                    ? 'আসল পণ্য যুক্ত করে গোডাউন ইনভেন্টরি শুরু করুন।'
+                    : 'Add real medicines to begin commercial tracking.'}
+                </p>
+                <button
+                  onClick={() => setShowAddProductModal(true)}
+                  className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition-colors"
+                >
+                  {mode === 'bn' ? '+ নতুন ওষুধ যোগ করুন' : '+ Add New Medicine'}
+                </button>
+              </div>
+            ) : (
+              filteredProducts.map((p) => (
               <div
                 key={p.id}
                 className="p-3 bg-[#1b1c20] rounded-xl border border-[#252628] flex items-center justify-between"
@@ -428,7 +476,8 @@ function InventoryContent() {
                   )}
                 </div>
               </div>
-            ))}
+            ))
+            )}
           </div>
         </div>
       )}
@@ -608,7 +657,28 @@ function InventoryContent() {
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {batches.length === 0 ? (
+            <div className="p-12 text-center bg-[#1b1c20] rounded-xl border border-[#252628] space-y-3">
+              <div className="w-12 h-12 mx-auto rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                <Calendar className="w-6 h-6" />
+              </div>
+              <h3 className="text-base font-semibold text-white">
+                {mode === 'bn' ? 'কোনো ব্যাচ এখনও যুক্ত করা হয়নি' : 'No Batches Registered Yet'}
+              </h3>
+              <p className="text-xs text-zinc-400 max-w-md mx-auto">
+                {mode === 'bn'
+                  ? 'ওষুধ ক্রয় বা কারখানার চালান আসার পর ‘নতুন চালান গ্রহন (GRN)’ অপশন থেকে ব্যাচ ও মেয়াদ দিয়ে স্টক ইন করুন।'
+                  : 'Receive incoming stock from GRN to register batches with manufacturing and expiry dates.'}
+              </p>
+              <button
+                onClick={() => setActiveTab('grn')}
+                className="inline-flex items-center space-x-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold transition-colors shadow-lg shadow-emerald-900/30"
+              >
+                <span>{mode === 'bn' ? 'চালান গ্রহন (GRN) শুরু করুন' : 'Go to Stock In (GRN)'}</span>
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {batches.map((b) => {
               const isExpired = (b.days_to_expiry || 0) <= 0;
               const isNearExpiry = (b.days_to_expiry || 0) <= 90 && !isExpired;
@@ -677,6 +747,7 @@ function InventoryContent() {
               );
             })}
           </div>
+          )}
         </div>
       )}
 

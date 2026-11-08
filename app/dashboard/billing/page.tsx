@@ -442,14 +442,28 @@ export default function BillingPOSPage() {
 
             {/* Medicine Cards Grid */}
             {availableProducts.length === 0 ? (
-              <div className="py-12 text-center text-zinc-500 text-xs border border-dashed border-[#252628] rounded-xl">
-                {stockSource === 'Employee_Stock'
-                  ? mode === 'bn'
-                    ? 'এই কর্মীর হাতে বর্তমানে বিক্রির উপযোগী কোনো ওষুধ নেই। গুদাম থেকে ওষুধ বরাদ্দ দিন।'
-                    : 'This employee does not currently hold any stock. Transfer stock from godown first.'
-                  : mode === 'bn'
-                  ? 'এই ক্যাটাগরিতে কোনো ওষুধ পাওয়া যায়নি।'
-                  : 'No medicines found in this category.'}
+              <div className="py-12 px-4 text-center text-zinc-400 text-xs border border-dashed border-[#252628] rounded-xl space-y-3">
+                <p>
+                  {stockSource === 'Employee_Stock'
+                    ? mode === 'bn'
+                      ? 'এই কর্মকর্তার কাছে বর্তমানে বিক্রির কোনো ঔষধ হস্তান্তর করা নেই। গুদাম হতে ঔষধ বরাদ্দ দিন।'
+                      : 'This employee does not currently hold any van stock. Transfer stock from godown first.'
+                    : products.length === 0
+                    ? mode === 'bn'
+                      ? 'সিস্টেমে কোনো ঔষধ তালিকাভুক্ত নেই। ইনভেন্টরিতে আপনার আসল বাণিজ্যিক ঔষধ যোগ করুন।'
+                      : 'No medicines exist in the system yet. Please add your real products in Inventory first.'
+                    : mode === 'bn'
+                    ? 'এই ক্যাটাগরিতে কোনো ওষুধ পাওয়া যায়নি।'
+                    : 'No medicines found in this category.'}
+                </p>
+                {products.length === 0 && (
+                  <a
+                    href="/dashboard/inventory"
+                    className="inline-flex items-center space-x-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold transition-colors"
+                  >
+                    <span>{mode === 'bn' ? '+ ইনভেন্টরিতে ঔষধ যোগ করুন' : '+ Add Medicine in Inventory'}</span>
+                  </a>
+                )}
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[460px] overflow-y-auto no-scrollbar pt-1">

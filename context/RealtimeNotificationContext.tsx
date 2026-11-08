@@ -154,6 +154,36 @@ export function RealtimeNotificationProvider({ children }: { children: React.Rea
     [addNotification]
   );
 
+  // Listen to local window events and cross-tab storage events
+  useEffect(() => {
+    if (!isMounted) return;
+
+    const handleLocalAlert = (e: any) => {
+      if (e?.detail) {
+        addNotification(e.detail);
+      }
+    };
+
+    const handleStorageEvent = (e: StorageEvent) => {
+      if (e.key === 'senatix_last_broadcast' && e.newValue) {
+        try {
+          const payload = JSON.parse(e.newValue);
+          if (payload && payload.title) {
+            addNotification(payload);
+          }
+        } catch (err) {}
+      }
+    };
+
+    window.addEventListener('senatix_live_alert', handleLocalAlert);
+    window.addEventListener('storage', handleStorageEvent);
+
+    return () => {
+      window.removeEventListener('senatix_live_alert', handleLocalAlert);
+      window.removeEventListener('storage', handleStorageEvent);
+    };
+  }, [isMounted, addNotification]);
+
   // Single safe Supabase Realtime channel subscription (Broadcast + PostgreSQL replication)
   useEffect(() => {
     if (!isMounted || !isSupabaseConfigured()) return;

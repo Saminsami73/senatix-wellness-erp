@@ -222,8 +222,21 @@ export default function ExpensesAndProfitPage() {
             <tbody className="divide-y divide-[#252628]">
               {expenses.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-zinc-500">
-                    {mode === 'bn' ? 'কোনো খরচের এন্ট্রি পাওয়া যায়নি।' : 'No expense entries found.'}
+                  <td colSpan={6} className="p-10 text-center">
+                    <div className="space-y-2.5">
+                      <p className="text-zinc-400 text-xs">
+                        {mode === 'bn'
+                          ? 'সিস্টেমে কোনো ব্যয় তালিকাভুক্ত নেই (সকল ডেমো ডাটা সাফ করা হয়েছে)।'
+                          : 'No expense records found. Pure commercial production mode active.'}
+                      </p>
+                      <button
+                        onClick={() => setShowAddModal(true)}
+                        className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-rose-600/90 hover:bg-rose-600 text-white rounded-lg text-xs font-semibold transition-colors shadow-sm"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>{mode === 'bn' ? '+ নতুন খরচ যোগ করুন' : '+ Log First Expense'}</span>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ) : (

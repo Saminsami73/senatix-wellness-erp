@@ -404,86 +404,21 @@ END $$;
 
 
 -- ============================================================================
--- 15. INITIAL SEED DATA FOR IMMEDIATE USE
--- Inserts initial medicines, employees, batches and doctors.
+-- 15. INITIAL ADMINISTRATIVE ACCOUNTS FOR PRODUCTION USE
+-- Only official executive & administrator profiles are provisioned.
+-- All medicine catalogs, batches, expenses, and doctors are kept 100% clean
+-- for authentic commercial additions.
 -- ============================================================================
 
--- A. Markets
-INSERT INTO markets (id, market_code, name, area_zone, delivery_days) VALUES
-('a0000000-0000-0000-0000-000000000001', 'MKT-01', 'Mirpur-10 Territory', 'Dhaka North', 'Sat, Mon, Wed'),
-('a0000000-0000-0000-0000-000000000002', 'MKT-02', 'Dhanmondi Medical Zone', 'Dhaka South', 'Sun, Tue, Thu'),
-('a0000000-0000-0000-0000-000000000003', 'MKT-03', 'Uttara Sector Route', 'Dhaka North', 'Everyday'),
-('a0000000-0000-0000-0000-000000000004', 'MKT-04', 'Mohakhali & Gulshan', 'Dhaka North', 'Mon, Wed, Fri'),
-('a0000000-0000-0000-0000-000000000005', 'MKT-05', 'Savar Pharma Belt', 'Dhaka Outskirts', 'Sun, Wed')
-ON CONFLICT (market_code) DO NOTHING;
-
--- B. Employees
-INSERT INTO employees (emp_id, name, phone, designation, role, base_salary, daily_ta_da, commission_percent, current_due_balance, primary_market_id) VALUES
-('ADM-01', 'Samin Yeasar', '01711000001', 'Super Administrator', 'super_admin', 80000, 500, 2.0, 0, 'a0000000-0000-0000-0000-000000000001'),
-('EXE-01', 'Dr. Rafiqul Islam', '01711000002', 'Managing Director', 'executor', 120000, 1000, 3.0, 0, 'a0000000-0000-0000-0000-000000000002'),
-('STR-01', 'Belal Hossain', '01711000003', 'Store In-charge', 'store_keeper', 28000, 300, 0.0, 0, 'a0000000-0000-0000-0000-000000000001'),
-('ACC-01', 'Nazmul Huda', '01711000004', 'Senior Accountant', 'accountant', 35000, 300, 0.0, 0, 'a0000000-0000-0000-0000-000000000001'),
-('EMP-001', 'Tanvir Hossain', '01712000001', 'Senior Sales Officer', 'sales_rep', 24000, 400, 1.5, 4500, 'a0000000-0000-0000-0000-000000000001'),
-('EMP-002', 'Shakib Al Hasan', '01712000002', 'Medical Sales Executive', 'sales_rep', 22000, 400, 1.5, 1200, 'a0000000-0000-0000-0000-000000000002'),
-('EMP-003', 'Kamrul Hasan', '01712000003', 'Territory Officer', 'sales_rep', 20000, 350, 1.5, 0, 'a0000000-0000-0000-0000-000000000003'),
-('DEL-01', 'Rubel Mia', '01713000001', 'Delivery Van Driver', 'sales_rep', 18000, 300, 0.0, 0, 'a0000000-0000-0000-0000-000000000001')
-ON CONFLICT (emp_id) DO NOTHING;
-
--- C. Suppliers
-INSERT INTO suppliers (id, name, contact_person, phone, address) VALUES
-('b0000000-0000-0000-0000-000000000001', 'Senatix Pharma Factory Unit-1', 'Engr. Mahbubul Alam', '01819000001', 'Tongi I/A, Gazipur'),
-('b0000000-0000-0000-0000-000000000002', 'Square Formulations Lab', 'Dr. Saiful Islam', '01819000002', 'Pabna Plant'),
-('b0000000-0000-0000-0000-000000000003', 'Apex Sterile Healthcare', 'Farhan Kabir', '01819000003', 'Bhaluka, Mymensingh')
-ON CONFLICT (name) DO NOTHING;
-
--- D. Products
-INSERT INTO products (id, sku_code, name, generic_name, category, strength, pack_size, cost_price_dp, trade_price_tp, mrp, stock, bonus_buy_qty, bonus_free_qty) VALUES
-('c0000000-0000-0000-0000-000000000001', 'MED-001', 'Normopress 5mg', 'Amlodipine Besilate', 'Tablet', '5mg', '10 x 10 Strip Box', 120.00, 160.00, 200.00, 320, 10, 1),
-('c0000000-0000-0000-0000-000000000002', 'MED-002', 'Senacal-D Plus', 'Calcium Orotate + Vit D3', 'Tablet', '400mg + 400IU', '3 x 10 Strip Box', 180.00, 240.00, 300.00, 210, 10, 1),
-('c0000000-0000-0000-0000-000000000003', 'MED-003', 'Gastroloc 20mg', 'Esomeprazole Magnesium', 'Capsule', '20mg', '10 x 10 Alu-Alu Box', 210.00, 280.00, 350.00, 450, 20, 2),
-('c0000000-0000-0000-0000-000000000004', 'MED-004', 'Ceftrix 1g IV/IM', 'Ceftriaxone Sodium', 'Injection', '1g', '1 Vial', 110.00, 150.00, 185.00, 95, 0, 0),
-('c0000000-0000-0000-0000-000000000005', 'MED-005', 'Dermasil Ointment', 'Clobetasol Propionate', 'Ointment', '0.05% w/w', '20g Tube Box', 45.00, 65.00, 85.00, 160, 10, 1),
-('c0000000-0000-0000-0000-000000000006', 'MED-006', 'Neurobex-M', 'Vit B1 + B6 + B12', 'Tablet', 'Standard', '10 x 10 Strip Box', 140.00, 190.00, 240.00, 280, 10, 1),
-('c0000000-0000-0000-0000-000000000007', 'MED-007', 'Senatix Vitamin C 500mg', 'Ascorbic Acid', 'Chewable', '500mg', '10 x 10 Orange Chewable', 60.00, 85.00, 110.00, 520, 15, 2),
-('c0000000-0000-0000-0000-000000000008', 'MED-008', 'Cardizem-SR 90', 'Diltiazem HCl', 'Capsule', '90mg', '3 x 10 Strip Box', 160.00, 220.00, 275.00, 140, 10, 1)
-ON CONFLICT (name) DO NOTHING;
-
--- E. Batches
-INSERT INTO product_batches (id, product_id, batch_no, mfg_date, exp_date, cost_price_dp, trade_price_tp, mrp, warehouse_qty) VALUES
-('d0000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001', 'NP-25A01', '2025-01-10', '2027-01-09', 120.00, 160.00, 200.00, 220),
-('d0000000-0000-0000-0000-000000000002', 'c0000000-0000-0000-0000-000000000001', 'NP-25B02', '2025-03-01', '2027-02-28', 120.00, 160.00, 200.00, 100),
-('d0000000-0000-0000-0000-000000000003', 'c0000000-0000-0000-0000-000000000002', 'SC-24K11', '2024-11-15', '2026-11-14', 180.00, 240.00, 300.00, 210),
-('d0000000-0000-0000-0000-000000000004', 'c0000000-0000-0000-0000-000000000003', 'GL-25C03', '2025-02-01', '2027-01-31', 210.00, 280.00, 350.00, 450),
-('d0000000-0000-0000-0000-000000000005', 'c0000000-0000-0000-0000-000000000004', 'CF-24J09', '2024-10-01', '2026-09-30', 110.00, 150.00, 185.00, 95),
-('d0000000-0000-0000-0000-000000000006', 'c0000000-0000-0000-0000-000000000005', 'DM-24L02', '2024-12-01', '2026-11-30', 45.00, 65.00, 85.00, 160),
-('d0000000-0000-0000-0000-000000000007', 'c0000000-0000-0000-0000-000000000006', 'NB-25B01', '2025-02-15', '2027-02-14', 140.00, 190.00, 240.00, 280),
-('d0000000-0000-0000-0000-000000000008', 'c0000000-0000-0000-0000-000000000007', 'VC-25A05', '2025-01-05', '2026-12-31', 60.00, 85.00, 110.00, 520),
-('d0000000-0000-0000-0000-000000000009', 'c0000000-0000-0000-0000-000000000008', 'CD-25A02', '2025-01-20', '2027-01-19', 160.00, 220.00, 275.00, 140)
-ON CONFLICT (product_id, batch_no) DO NOTHING;
-
--- F. Employee In-Hand Stock (Allocation)
-INSERT INTO emp_stock (id, emp_id, product_id, batch_id, qty) VALUES
-('e0000000-0000-0000-0000-000000000001', 'EMP-001', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000001', 25),
-('e0000000-0000-0000-0000-000000000002', 'EMP-001', 'c0000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000003', 15),
-('e0000000-0000-0000-0000-000000000003', 'EMP-001', 'c0000000-0000-0000-0000-000000000003', 'd0000000-0000-0000-0000-000000000004', 30),
-('e0000000-0000-0000-0000-000000000004', 'EMP-002', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000001', 20),
-('e0000000-0000-0000-0000-000000000005', 'EMP-002', 'c0000000-0000-0000-0000-000000000006', 'd0000000-0000-0000-0000-000000000007', 15),
-('e0000000-0000-0000-0000-000000000006', 'EMP-003', 'c0000000-0000-0000-0000-000000000007', 'd0000000-0000-0000-0000-000000000008', 40)
-ON CONFLICT (emp_id, product_id, batch_id) DO NOTHING;
-
--- G. Doctors
-INSERT INTO doctors (id, doctor_code, name, degrees, specialty, hospital_chamber, phone, assigned_emp_id, prescriptions_written_monthly, total_promotional_expense, prescribed_products) VALUES
-('f0000000-0000-0000-0000-000000000001', 'DOC-001', 'Prof. Dr. A. K. Azad', 'MBBS, FCPS, MD (Cardiology)', 'Cardiologist', 'National Heart Foundation, Mirpur', '01711223344', 'EMP-001', 145, 12500, ARRAY['Normopress 5mg', 'Cardizem-SR 90']),
-('f0000000-0000-0000-0000-000000000002', 'DOC-002', 'Dr. Farzana Rahman', 'MBBS, DGO, MCPS', 'Gynecologist', 'Popular Diagnostic Center, Dhanmondi', '01711556677', 'EMP-002', 110, 8500, ARRAY['Senacal-D Plus', 'Neurobex-M']),
-('f0000000-0000-0000-0000-000000000003', 'DOC-003', 'Dr. Mahmudul Hasan', 'MBBS, MD (Gastroenterology)', 'Gastroenterologist', 'Ibn Sina Medical, Dhanmondi', '01711889900', 'EMP-002', 180, 15000, ARRAY['Gastroloc 20mg']),
-('f0000000-0000-0000-0000-000000000004', 'DOC-004', 'Dr. Nusrat Jahan', 'MBBS, DDV (Dermatology)', 'Dermatologist', 'Labaid Hospital, Uttara', '01711334455', 'EMP-003', 75, 4200, ARRAY['Dermasil Ointment'])
-ON CONFLICT (doctor_code) DO NOTHING;
-
--- H. Initial Expenses
-INSERT INTO expenses (id, expense_date, category, title, amount, payment_method, entered_by_emp_id) VALUES
-('e1000000-0000-0000-0000-000000000001', CURRENT_DATE, 'Office_Warehouse_Rent', 'Mirpur Central Godown Rent', 35000, 'Bank', 'ADM-01'),
-('e1000000-0000-0000-0000-000000000002', CURRENT_DATE, 'Electricity_Internet', 'DESCO Monthly Electric Bill & Fiber Net', 6800, 'bKash', 'ACC-01'),
-('e1000000-0000-0000-0000-000000000003', CURRENT_DATE, 'Delivery_Van_Fuel', 'Delivery Van Fuel & CNG Refill', 3200, 'Cash', 'DEL-01'),
-('e1000000-0000-0000-0000-000000000004', CURRENT_DATE, 'Staff_Tea_Entertainment', 'Weekly Staff Tea & Office Refreshments', 1450, 'Cash', 'STR-01')
-ON CONFLICT (id) DO NOTHING;
+INSERT INTO employees (emp_id, name, phone, designation, role, base_salary, daily_ta_da, commission_percent, current_due_balance) VALUES
+('ADM-01', 'Samin Yeasar', '+8801770578142', 'Chief Executive Officer & Super Admin', 'super_admin', 80000, 500, 2.0, 0),
+('EXE-01', 'Dr. Rafiqul Islam', '+8801711000002', 'Managing Director', 'executor', 120000, 1000, 3.0, 0),
+('MGR-01', 'Farhan Ahmed', '+8801711000005', 'Chief Operations Manager', 'manager', 60000, 400, 1.5, 0),
+('ACC-01', 'Nazmul Huda', '+8801711000004', 'Chief Financial Accountant', 'accountant', 45000, 300, 0.0, 0),
+('STR-01', 'Belal Hossain', '+8801711000003', 'Central Godown & Store In-charge', 'store_keeper', 32000, 300, 0.0, 0)
+ON CONFLICT (emp_id) DO UPDATE SET
+  name = EXCLUDED.name,
+  phone = EXCLUDED.phone,
+  designation = EXCLUDED.designation,
+  role = EXCLUDED.role;
 
