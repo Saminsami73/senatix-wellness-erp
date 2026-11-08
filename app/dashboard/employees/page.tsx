@@ -13,6 +13,9 @@ import {
   RotateCcw,
   Boxes,
   CheckCircle,
+  Printer,
+  ShieldCheck,
+  ArrowDownLeft,
 } from 'lucide-react';
 import { erpStore } from '@/lib/erpStore';
 import { useLanguage } from '@/context/LanguageContext';
@@ -46,6 +49,19 @@ export default function EmployeesDirectoryPage() {
   // Cash Handover Modal State
   const [handoverStaff, setHandoverStaff] = useState<Employee | null>(null);
   const [handoverAmount, setHandoverAmount] = useState(0);
+  const [handoverPaymentMethod, setHandoverPaymentMethod] = useState<'Cash' | 'bKash' | 'Bank'>('Cash');
+  const [handoverNotes, setHandoverNotes] = useState('');
+  const [voucherData, setVoucherData] = useState<{
+    voucherRef: string;
+    employeeName: string;
+    empId: string;
+    phone: string;
+    amount: number;
+    paymentMethod: string;
+    remainingBalance: number;
+    notes: string;
+    date: string;
+  } | null>(null);
 
   // Add Employee Modal State
   const [showAddEmpModal, setShowAddEmpModal] = useState(false);
@@ -141,26 +157,33 @@ export default function EmployeesDirectoryPage() {
     e.preventDefault();
     if (!handoverStaff || handoverAmount <= 0) return;
 
-    handoverStaff.current_due_balance = Math.max(0, handoverStaff.current_due_balance - handoverAmount);
+    try {
+      const res = erpStore.collectEmployeeCashDue({
+        emp_id: handoverStaff.emp_id,
+        amount: handoverAmount,
+        payment_method: handoverPaymentMethod,
+        notes: handoverNotes,
+      });
 
-    erpStore.getLedger().unshift({
-      id: `led-${Date.now()}`,
-      date_time: new Date().toISOString(),
-      date_only: new Date().toISOString().split('T')[0],
-      account_type: 'Employee',
-      emp_id: handoverStaff.emp_id,
-      payment_method: 'Cash',
-      description: `ফিল্ড কালেকশন ক্যাশ অফিসে জমা: ${handoverStaff.name}`,
-      debit: 0,
-      credit: handoverAmount,
-      balance: handoverStaff.current_due_balance,
-      party_name: handoverStaff.name,
-    });
+      setVoucherData({
+        voucherRef: res.voucherRef,
+        employeeName: handoverStaff.name,
+        empId: handoverStaff.emp_id,
+        phone: handoverStaff.phone,
+        amount: handoverAmount,
+        paymentMethod: handoverPaymentMethod,
+        remainingBalance: res.balanceRemaining,
+        notes: handoverNotes,
+        date: new Date().toLocaleString(mode === 'bn' ? 'bn-BD' : 'en-US'),
+      });
 
-    alert(mode === 'bn' ? `৳ ${handoverAmount.toLocaleString()} টাকা অফিস ক্যাশে জমা হয়েছে!` : `Cash received: ৳${handoverAmount.toLocaleString()}`);
-    setHandoverStaff(null);
-    setHandoverAmount(0);
-    refreshState();
+      setHandoverStaff(null);
+      setHandoverAmount(0);
+      setHandoverNotes('');
+      refreshState();
+    } catch (err: any) {
+      alert(err.message || 'Cash collection failed');
+    }
   };
 
   const handleSaveEmployee = (e: React.FormEvent) => {
@@ -231,6 +254,41 @@ export default function EmployeesDirectoryPage() {
             <Plus className="size-4" />
             <span>{mode === 'bn' ? '+ নতুন কর্মী যোগ' : '+ Add Staff'}</span>
           </button>
+        </div>
+      </div>
+
+      {/* 50+ Non-Tech Helpful Visual Guide Banner */}
+      <div className="p-3.5 bg-[#15161c] border border-[#252628] rounded-2xl grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="p-3 bg-[#0b0c10] border border-[#252628] rounded-xl flex items-start space-x-3">
+          <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 shrink-0">
+            <RotateCcw className="size-4" />
+          </div>
+          <div>
+            <h4 className="font-bold text-xs text-white">
+              {mode === 'bn' ? '১. অবিক্রীত ওষুধ গুদামে ফেরত নেওয়ার নিয়ম' : '1. Returning Unsold Medicines to Godown'}
+            </h4>
+            <p className="text-[11px] text-zinc-400 mt-0.5 leading-relaxed">
+              {mode === 'bn'
+                ? 'কর্মী বাইরে থেকে অবিক্রীত ওষুধ নিয়ে এলে তার নামের পাশে "ফেরত নিন" বাটনে চাপুন। ওষুধটি সরাসরি গুদামের মূল মজুতে যুক্ত হবে।'
+                : 'When a field rep brings back unsold boxes, click "Return Stock". Items will immediately be returned to warehouse inventory.'}
+            </p>
+          </div>
+        </div>
+
+        <div className="p-3 bg-[#0b0c10] border border-[#252628] rounded-xl flex items-start space-x-3">
+          <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 shrink-0">
+            <ArrowDownLeft className="size-4" />
+          </div>
+          <div>
+            <h4 className="font-bold text-xs text-white">
+              {mode === 'bn' ? '২. কর্মীর ক্যাশ জমা ও বকেয়া পরিশোধ' : '2. Collecting Cash & Clearing Due Balance'}
+            </h4>
+            <p className="text-[11px] text-zinc-400 mt-0.5 leading-relaxed">
+              {mode === 'bn'
+                ? 'কর্মী কালেকশন টাকা অফিসে জমা দিলে "ক্যাশ গ্রহণ" বাটনে চাপুন। টাকা জমা হওয়ার সাথে সাথে ক্যাশ লেজারে এন্ট্রি পড়বে এবং মানি রিসিট প্রিন্ট করতে পারবেন।'
+                : 'When a rep deposits collected cash, click "Take Cash". His due will decrease instantly, and a printable deposit receipt will be created.'}
+            </p>
+          </div>
         </div>
       </div>
 
@@ -608,25 +666,173 @@ export default function EmployeesDirectoryPage() {
                 <label className="text-zinc-400 font-medium block mb-1">
                   {mode === 'bn' ? 'অফিসে জমা টাকার পরিমাণ (টাকা) *' : 'Amount Received (Tk) *'}
                 </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    min="1"
+                    required
+                    value={handoverAmount}
+                    onChange={(e) => setHandoverAmount(parseFloat(e.target.value) || 0)}
+                    className="w-full h-11 pl-8 pr-3 bg-[#0b0c10] border border-[#252628] focus:border-[#de9489] rounded-xl text-base font-bold text-white outline-none"
+                  />
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 font-bold">৳</span>
+                </div>
+                {handoverStaff.current_due_balance > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setHandoverAmount(handoverStaff.current_due_balance)}
+                    className="mt-1 text-[11px] text-[#fae0d1] hover:underline"
+                  >
+                    {mode === 'bn' ? `সম্পূর্ণ বকেয়া (${formatCurrency(handoverStaff.current_due_balance)}) সিলেক্ট করুন` : `Select full balance (${formatCurrency(handoverStaff.current_due_balance)})`}
+                  </button>
+                )}
+              </div>
+
+              <div>
+                <label className="text-zinc-400 font-medium block mb-1">
+                  {mode === 'bn' ? 'টাকা প্রদানের মাধ্যম *' : 'Payment Method *'}
+                </label>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {(['Cash', 'bKash', 'Bank'] as const).map((method) => (
+                    <button
+                      key={method}
+                      type="button"
+                      onClick={() => setHandoverPaymentMethod(method)}
+                      className={`py-2 rounded-xl text-xs font-semibold border transition-all ${
+                        handoverPaymentMethod === method
+                          ? 'bg-white text-black border-white shadow-sm'
+                          : 'bg-[#0b0c10] text-zinc-400 border-[#252628] hover:text-white'
+                      }`}
+                    >
+                      {method === 'Cash' ? (mode === 'bn' ? 'নগদ ক্যাশ' : 'Cash') : method}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-zinc-400 font-medium block mb-1">
+                  {mode === 'bn' ? 'সংক্ষিপ্ত বিবরণ বা নোট (ঐচ্ছিক)' : 'Notes / Remarks (Optional)'}
+                </label>
                 <input
-                  type="number"
-                  min="1"
-                  required
-                  value={handoverAmount}
-                  onChange={(e) => setHandoverAmount(parseFloat(e.target.value) || 0)}
-                  className="w-full h-11 px-3 bg-[#0b0c10] border border-[#252628] focus:border-[#de9489] rounded-xl text-base font-bold text-white outline-none"
+                  type="text"
+                  value={handoverNotes}
+                  onChange={(e) => setHandoverNotes(e.target.value)}
+                  placeholder={mode === 'bn' ? 'যেমন: ধানমন্ডি রুটের কালেকশন' : 'e.g. Field sales collection'}
+                  className="w-full h-10 px-3 bg-[#0b0c10] border border-[#252628] focus:border-[#de9489] rounded-xl text-xs text-white outline-none"
                 />
               </div>
 
               <div className="pt-2">
                 <button
                   type="submit"
-                  className="w-full py-2.5 bg-white hover:bg-zinc-100 text-[#0b0c10] font-bold text-sm rounded-xl transition-all shadow-md active:scale-95"
+                  className="w-full py-3 bg-gradient-to-r from-emerald-400 to-teal-500 hover:brightness-110 text-[#0b0c10] font-bold text-sm rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
                 >
-                  {mode === 'bn' ? 'ক্যাশ জমা নিশ্চিত করুন' : 'Confirm Cash Handover'}
+                  {mode === 'bn' ? 'ক্যাশ জমা নিশ্চিত করুন ও রিসিট নিন' : 'Confirm Deposit & Issue Voucher'}
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal 3.5: Printable Cash Deposit Voucher / Money Receipt */}
+      {voucherData && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-white text-black rounded-3xl max-w-md w-full p-6 shadow-2xl relative font-sans">
+            {/* Header / Brand */}
+            <div className="text-center pb-4 border-b-2 border-dashed border-zinc-300">
+              <h2 className="text-xl font-black tracking-tight text-zinc-900 uppercase">
+                {mode === 'bn' ? 'সেনাটিক্স ওয়েলনেস ডিস্ট্রিবিউশন' : 'SENATIX WELLNESS DISTRIBUTION'}
+              </h2>
+              <p className="text-xs text-zinc-600 mt-0.5">
+                হাউজ #১২, রোড #০৪, ধানমন্ডি, ঢাকা • ফোন: 01711-000001
+              </p>
+              <div className="inline-block px-3 py-1 bg-zinc-900 text-white rounded-full text-xs font-bold tracking-wider uppercase mt-2">
+                {mode === 'bn' ? 'অফিসিয়াল ক্যাশ জমা মানি রিসিট' : 'OFFICIAL MONEY RECEIPT VOUCHER'}
+              </div>
+            </div>
+
+            {/* Voucher Details Table */}
+            <div className="py-4 space-y-2.5 text-xs text-zinc-800">
+              <div className="flex justify-between items-center py-1 border-b border-zinc-200">
+                <span className="text-zinc-500 font-medium">{mode === 'bn' ? 'ভাউচার নম্বর:' : 'Voucher Ref:'}</span>
+                <span className="font-mono font-bold text-zinc-900">{voucherData.voucherRef}</span>
+              </div>
+
+              <div className="flex justify-between items-center py-1 border-b border-zinc-200">
+                <span className="text-zinc-500 font-medium">{mode === 'bn' ? 'তারিখ ও সময়:' : 'Date & Time:'}</span>
+                <span className="font-semibold text-zinc-900">{voucherData.date}</span>
+              </div>
+
+              <div className="flex justify-between items-center py-1 border-b border-zinc-200">
+                <span className="text-zinc-500 font-medium">{mode === 'bn' ? 'কর্মীর নাম ও আইডি:' : 'Employee Name & ID:'}</span>
+                <span className="font-bold text-zinc-900">{voucherData.employeeName} ({voucherData.empId})</span>
+              </div>
+
+              <div className="flex justify-between items-center py-1 border-b border-zinc-200">
+                <span className="text-zinc-500 font-medium">{mode === 'bn' ? 'পেমেন্ট মাধ্যম:' : 'Payment Method:'}</span>
+                <span className="font-bold text-zinc-900">
+                  {voucherData.paymentMethod === 'Cash' ? (mode === 'bn' ? 'নগদ ক্যাশ' : 'Cash') : voucherData.paymentMethod}
+                </span>
+              </div>
+
+              {voucherData.notes && (
+                <div className="flex justify-between items-center py-1 border-b border-zinc-200">
+                  <span className="text-zinc-500 font-medium">{mode === 'bn' ? 'মন্তব্য:' : 'Remarks:'}</span>
+                  <span className="text-zinc-800">{voucherData.notes}</span>
+                </div>
+              )}
+
+              {/* Big Amount Card */}
+              <div className="p-3 bg-emerald-50 rounded-2xl border border-emerald-200 text-center my-3">
+                <div className="text-xs text-emerald-800 font-semibold uppercase">
+                  {mode === 'bn' ? 'জমা গৃহীত টাকার পরিমাণ' : 'Total Amount Received'}
+                </div>
+                <div className="text-2xl font-black text-emerald-900 mt-0.5">
+                  ৳ {voucherData.amount.toLocaleString()}
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center py-1 text-xs">
+                <span className="text-zinc-600 font-medium">{mode === 'bn' ? 'কর্মীর অবশিষ্ট বকেয়া ব্যালেন্স:' : 'Remaining Due Balance:'}</span>
+                <span className="font-bold text-zinc-900">৳ {voucherData.remainingBalance.toLocaleString()}</span>
+              </div>
+            </div>
+
+            {/* Signature Blocks */}
+            <div className="pt-8 pb-3 grid grid-cols-2 gap-4 text-center text-[11px] text-zinc-700">
+              <div>
+                <div className="border-t border-zinc-400 pt-1 font-semibold">
+                  {mode === 'bn' ? 'টাকা প্রদানকারীর স্বাক্ষর' : 'Staff / Depositor Signature'}
+                </div>
+              </div>
+              <div>
+                <div className="border-t border-zinc-400 pt-1 font-semibold">
+                  {mode === 'bn' ? 'গ্রহণকারী ম্যানেজমেন্ট স্বাক্ষর' : 'Authorized Receiver Signature'}
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="pt-4 border-t border-zinc-200 flex space-x-2">
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className="flex-1 py-2.5 bg-zinc-900 hover:bg-black text-white font-bold rounded-xl text-xs flex items-center justify-center space-x-1.5 shadow-md transition-colors"
+              >
+                <Printer className="size-4" />
+                <span>{mode === 'bn' ? 'রিসিট প্রিন্ট করুন' : 'Print Voucher'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setVoucherData(null)}
+                className="flex-1 py-2.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold rounded-xl text-xs transition-colors"
+              >
+                {mode === 'bn' ? 'সম্পন্ন (বন্ধ করুন)' : 'Done (Close)'}
+              </button>
+            </div>
           </div>
         </div>
       )}

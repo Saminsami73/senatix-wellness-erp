@@ -6,9 +6,10 @@ import { RightSidebar } from '@/components/dashboard/RightSidebar';
 import { MobileBottomNav } from '@/components/dashboard/MobileBottomNav';
 import { QuickBillModal } from '@/components/dashboard/QuickBillModal';
 import { BrandLogo } from '@/components/ui/BrandLogo';
-import { Receipt, Bell, Menu, Sun, Moon, Globe } from 'lucide-react';
+import { Receipt, Menu, Sun, Moon, Globe } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useTheme } from '@/context/ThemeContext';
+import { LiveNotificationCenter } from '@/components/ui/LiveNotificationCenter';
 
 export default function DashboardLayout({
   children,
@@ -71,14 +72,8 @@ export default function DashboardLayout({
             <Receipt className="size-4 text-black" />
           </button>
 
-          {/* Activity Alerts */}
-          <button
-            onClick={() => setMobileRightOpen(true)}
-            className="size-8 rounded-lg bg-zinc-800 border border-zinc-700 grid place-items-center text-zinc-300 hover:text-white"
-            title={mode === 'bn' ? 'সতর্কতা' : 'Alerts'}
-          >
-            <Bell className="size-4" />
-          </button>
+          {/* Live Realtime Notification Bell */}
+          <LiveNotificationCenter />
         </div>
       </header>
 

@@ -6,6 +6,7 @@ import { Receipt, Bell, FileSpreadsheet, AlertTriangle, CheckCircle, X, HelpCirc
 import { erpStore } from '@/lib/erpStore';
 import { exportFullCompanyBackup } from '@/lib/excelExport';
 import { useLanguage } from '@/context/LanguageContext';
+import { LiveNotificationCenter } from '@/components/ui/LiveNotificationCenter';
 
 interface RightSidebarProps {
   onOpenQuickBill: () => void;
@@ -65,6 +66,9 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({ onOpenQuickBill, onC
           >
             <Receipt className="size-5 text-zinc-900 group-hover:scale-110 transition-transform" />
           </button>
+
+          {/* Live Realtime Notification Bell */}
+          <LiveNotificationCenter />
 
           {/* Near-Expiry & Low-Stock Alerts Bell */}
           <div className="relative">

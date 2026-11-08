@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Navigation, Receipt, Users, Menu } from 'lucide-react';
+import { LayoutDashboard, Boxes, Receipt, Users, Menu } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
 interface MobileBottomNavProps {
@@ -21,8 +21,8 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   const navItems = [
     { href: '/dashboard', label: mode === 'bn' ? 'ড্যাশবোর্ড' : 'Dashboard', icon: LayoutDashboard },
     { href: '/dashboard/employees', label: mode === 'bn' ? 'কর্মী ও স্টক' : 'Staff Stock', icon: Users },
+    { href: '/dashboard/inventory', label: mode === 'bn' ? 'গোডাউন স্টক' : 'Inventory', icon: Boxes },
     { href: '/dashboard/billing', label: mode === 'bn' ? 'নতুন চালান' : 'Make Bill', icon: Receipt },
-    { href: '/dashboard/field', label: mode === 'bn' ? 'ফিল্ড অ্যাপ' : 'Field App', icon: Navigation },
   ];
 
   return (

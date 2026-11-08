@@ -93,7 +93,6 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({ onCloseMobile }) => {
     { href: '/dashboard/billing', label: t('nav_billing'), icon: Receipt, badge: mode === 'bn' ? 'চালান' : 'POS' },
     { href: '/dashboard/employees', label: mode === 'bn' ? 'কর্মী ও অবিক্রীত স্টক' : 'Staff & In-Hand Stock', icon: Users, badge: metrics.totalEmployeeHeldBoxes > 0 ? `${metrics.totalEmployeeHeldBoxes} ${mode === 'bn' ? 'বক্স' : 'box'}` : null },
     { href: '/dashboard/inventory', label: t('nav_inventory'), icon: Boxes, badge: (metrics.lowStockCount + metrics.expiringCount) > 0 ? (metrics.lowStockCount + metrics.expiringCount) : null },
-    { href: '/dashboard/field', label: t('nav_field_app'), icon: Navigation, badge: mode === 'bn' ? 'অফিসার' : 'Field' },
     { href: '/dashboard/orders', label: t('nav_orders'), icon: Truck, badge: metrics.pendingOrdersCount > 0 ? metrics.pendingOrdersCount : null },
     { href: '/dashboard/doctors', label: t('nav_doctors'), icon: Stethoscope, badge: null },
     { href: '/dashboard/hr-payroll', label: t('nav_hr_payroll'), icon: CalendarCheck, badge: null },
@@ -149,33 +148,6 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({ onCloseMobile }) => {
             </div>
           </div>
           <MoreVertical className="size-4 ml-auto text-[#7a7d82] shrink-0" />
-        </div>
-
-        {/* Portal Switcher Pill */}
-        <div className="shrink-0 grid grid-cols-2 gap-1 p-1 bg-[#15161c] border border-[#252628] rounded-xl mt-3 text-[11px] font-semibold">
-          <Link
-            href="/dashboard"
-            className={`py-1.5 px-2 rounded-lg flex items-center justify-center space-x-1.5 transition-colors ${
-              pathname !== '/dashboard/field'
-                ? 'bg-[#35383d] text-white shadow-sm'
-                : 'text-zinc-400 hover:text-white'
-            }`}
-          >
-            <Building2 className={`size-3.5 ${pathname !== '/dashboard/field' ? 'text-[#fae0d1]' : 'text-zinc-400'}`} />
-            <span>{mode === 'bn' ? 'হেড অফিস' : 'Head Office'}</span>
-          </Link>
-
-          <Link
-            href="/dashboard/field"
-            className={`py-1.5 px-2 rounded-lg flex items-center justify-center space-x-1.5 transition-colors ${
-              pathname === '/dashboard/field'
-                ? 'bg-[#35383d] text-white shadow-sm'
-                : 'text-zinc-400 hover:text-white'
-            }`}
-          >
-            <Navigation className={`size-3.5 ${pathname === '/dashboard/field' ? 'text-[#86759f]' : 'text-zinc-400'}`} />
-            <span>{mode === 'bn' ? 'ফিল্ড অ্যাপ' : 'Field App'}</span>
-          </Link>
         </div>
 
         {/* Navigation Links */}

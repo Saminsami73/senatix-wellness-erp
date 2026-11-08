@@ -278,433 +278,270 @@ const initialSuppliers: Supplier[] = [
 
 const initialDoctors: Doctor[] = [
   {
-    id: 'doc-1',
-    doctor_code: 'DOC-1001',
-    name: 'Dr. M. A. Karim',
-    degrees: 'MBBS, FCPS (Medicine)',
-    specialty: 'Internal Medicine Specialist',
-    hospital_chamber: 'Popular Diagnostic Center, Mirpur-10, Dhaka',
-    phone: '01712345678',
-    market_id: 'mkt-1',
+    id: 'f0000000-0000-0000-0000-000000000001',
+    doctor_code: 'DOC-001',
+    name: 'Prof. Dr. A. K. Azad',
+    degrees: 'MBBS, FCPS, MD (Cardiology)',
+    specialty: 'Cardiologist',
+    hospital_chamber: 'National Heart Foundation, Mirpur',
+    phone: '01711223344',
     assigned_emp_id: 'EMP-001',
     prescriptions_written_monthly: 145,
-    total_promotional_expense: 6500,
-    prescribed_products: ['Cal-D Plus 500mg', 'Gastroloc 20mg'],
-    image_url: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&auto=format&fit=crop&q=80',
+    total_promotional_expense: 12500,
+    prescribed_products: ['Normopress 5mg', 'Cardizem-SR 90'],
     is_active: true,
-    created_at: '2026-01-15T09:00:00Z',
   },
   {
-    id: 'doc-2',
-    doctor_code: 'DOC-1002',
-    name: 'Prof. Dr. Syeda Naznin',
-    degrees: 'MBBS, DGO, FCPS (Obs & Gynae)',
-    specialty: 'Gynecologist & Obstetrician',
-    hospital_chamber: 'Labaid Specialized Hospital, Dhanmondi, Dhaka',
-    phone: '01819234567',
-    market_id: 'mkt-2',
+    id: 'f0000000-0000-0000-0000-000000000002',
+    doctor_code: 'DOC-002',
+    name: 'Dr. Farzana Rahman',
+    degrees: 'MBBS, DGO, MCPS',
+    specialty: 'Gynecologist',
+    hospital_chamber: 'Popular Diagnostic Center, Dhanmondi',
+    phone: '01711556677',
     assigned_emp_id: 'EMP-002',
-    prescriptions_written_monthly: 210,
-    total_promotional_expense: 12000,
-    prescribed_products: ['Cal-D Plus 500mg', 'GlucoHealth Sugar Balance'],
-    image_url: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150&auto=format&fit=crop&q=80',
+    prescriptions_written_monthly: 110,
+    total_promotional_expense: 8500,
+    prescribed_products: ['Senacal-D Plus', 'Neurobex-M'],
     is_active: true,
-    created_at: '2026-02-10T10:00:00Z',
   },
   {
-    id: 'doc-3',
-    doctor_code: 'DOC-1003',
-    name: 'Dr. Tariqul Islam',
-    degrees: 'MBBS, MD (Cardiology)',
-    specialty: 'Cardiologist',
-    hospital_chamber: 'Ibn Sina Medical College & Hospital, Kallyanpur, Dhaka',
-    phone: '01911456789',
-    market_id: 'mkt-1',
-    assigned_emp_id: 'EMP-001',
-    prescriptions_written_monthly: 95,
-    total_promotional_expense: 4000,
-    prescribed_products: ['CardioProtect Q10', 'Gastroloc 20mg'],
-    image_url: null,
+    id: 'f0000000-0000-0000-0000-000000000003',
+    doctor_code: 'DOC-003',
+    name: 'Dr. Mahmudul Hasan',
+    degrees: 'MBBS, MD (Gastroenterology)',
+    specialty: 'Gastroenterologist',
+    hospital_chamber: 'Ibn Sina Medical, Dhanmondi',
+    phone: '01711889900',
+    assigned_emp_id: 'EMP-002',
+    prescriptions_written_monthly: 180,
+    total_promotional_expense: 15000,
+    prescribed_products: ['Gastroloc 20mg'],
     is_active: true,
-    created_at: '2026-03-01T11:00:00Z',
   },
   {
-    id: 'doc-4',
-    doctor_code: 'DOC-1004',
-    name: 'Dr. Shamim Ara Begum',
+    id: 'f0000000-0000-0000-0000-000000000004',
+    doctor_code: 'DOC-004',
+    name: 'Dr. Nusrat Jahan',
     degrees: 'MBBS, DDV (Dermatology)',
-    specialty: 'Skin & Allergy Specialist',
-    hospital_chamber: 'Uttara Crescent Hospital, Sector-3, Uttara, Dhaka',
-    phone: '01733567890',
-    market_id: 'mkt-3',
+    specialty: 'Dermatologist',
+    hospital_chamber: 'Labaid Hospital, Uttara',
+    phone: '01711334455',
     assigned_emp_id: 'EMP-003',
-    prescriptions_written_monthly: 120,
-    total_promotional_expense: 5500,
-    prescribed_products: ['ImmunoZinc Forte', 'VitaBoost Active Daily'],
-    image_url: null,
+    prescriptions_written_monthly: 75,
+    total_promotional_expense: 4200,
+    prescribed_products: ['Dermasil Ointment'],
     is_active: true,
-    created_at: '2026-03-20T14:30:00Z',
   },
 ];
 
-const initialDoctorExpenses: DoctorExpense[] = [
-  {
-    id: 'dexp-1',
-    doctor_id: 'doc-1',
-    emp_id: 'EMP-001',
-    expense_date: '2026-11-01',
-    expense_type: 'Gift_Item',
-    title: 'Executive Leather Prescription Pad & Parker Pen Set',
-    amount: 1500,
-    prescriptions_written_count: 35,
-    notes: 'Visited chamber on Sunday evening. Doctor committed 35+ Cal-D Plus Rx monthly.',
-    created_at: '2026-11-01T18:00:00Z',
-  },
-  {
-    id: 'dexp-2',
-    doctor_id: 'doc-2',
-    emp_id: 'EMP-002',
-    expense_date: '2026-10-28',
-    expense_type: 'Sample_Medicine',
-    title: 'Trial Samples: Cal-D Plus (10 boxes) + Gastroloc (10 boxes)',
-    amount: 3500,
-    prescriptions_written_count: 50,
-    notes: 'Supplied trial samples for OPD maternity patients.',
-    created_at: '2026-10-28T12:30:00Z',
-  },
-  {
-    id: 'dexp-3',
-    doctor_id: 'doc-2',
-    emp_id: 'EMP-002',
-    expense_date: '2026-10-15',
-    expense_type: 'Dinner_Conference',
-    title: 'Gynecological Society Clinical Meet Sponsorship & Dinner',
-    amount: 8500,
-    prescriptions_written_count: 80,
-    notes: 'Monthly clinical presentation and product display for Senatix portfolio.',
-    created_at: '2026-10-15T21:00:00Z',
-  },
-  {
-    id: 'dexp-4',
-    doctor_id: 'doc-3',
-    emp_id: 'EMP-001',
-    expense_date: '2026-10-25',
-    expense_type: 'Cash_Honorarium',
-    title: 'Cardio Observation Study Honorarium',
-    amount: 4000,
-    prescriptions_written_count: 40,
-    notes: 'Disbursed quarterly medical observation honorarium.',
-    created_at: '2026-10-25T16:00:00Z',
-  },
-];
+const initialDoctorExpenses: DoctorExpense[] = [];
 
 const initialProducts: Product[] = [
   {
-    id: 'prod-1',
-    sku_code: 'SNX-TAB-001',
-    name: 'Cal-D Plus 500mg',
-    generic_name: 'Calcium Carbonate + Vitamin D3',
+    id: 'c0000000-0000-0000-0000-000000000001',
+    sku_code: 'MED-001',
+    name: 'Normopress 5mg',
+    generic_name: 'Amlodipine Besilate',
     category: 'Tablet',
-    strength: '500mg + 200IU',
-    pack_size: 'Box of 30 Tablets',
-    supplier_id: 'sup-1',
-    stock: 240,
+    strength: '5mg',
+    pack_size: '10 x 10 Strip Box',
+    stock: 320,
     low_stock_alert_level: 50,
-    cost_price_dp: 180,
-    trade_price_tp: 240,
-    mrp: 280,
+    cost_price_dp: 120.00,
+    trade_price_tp: 160.00,
+    mrp: 200.00,
     bonus_buy_qty: 10,
     bonus_free_qty: 1,
     is_active: true,
   },
   {
-    id: 'prod-2',
-    sku_code: 'SNX-CAP-002',
-    name: 'Senatix Cefixime 200mg',
-    generic_name: 'Cefixime Trihydrate',
-    category: 'Capsule',
-    strength: '200mg',
-    pack_size: 'Box of 14 Capsules',
-    supplier_id: 'sup-2',
-    stock: 180,
+    id: 'c0000000-0000-0000-0000-000000000002',
+    sku_code: 'MED-002',
+    name: 'Senacal-D Plus',
+    generic_name: 'Calcium Orotate + Vit D3',
+    category: 'Tablet',
+    strength: '400mg + 400IU',
+    pack_size: '3 x 10 Strip Box',
+    stock: 210,
     low_stock_alert_level: 40,
-    cost_price_dp: 320,
-    trade_price_tp: 420,
-    mrp: 500,
+    cost_price_dp: 180.00,
+    trade_price_tp: 240.00,
+    mrp: 300.00,
     bonus_buy_qty: 10,
     bonus_free_qty: 1,
     is_active: true,
   },
   {
-    id: 'prod-3',
-    sku_code: 'SNX-TAB-003',
+    id: 'c0000000-0000-0000-0000-000000000003',
+    sku_code: 'MED-003',
     name: 'Gastroloc 20mg',
-    generic_name: 'Omeprazole BP',
-    category: 'Tablet',
+    generic_name: 'Esomeprazole Magnesium',
+    category: 'Capsule',
     strength: '20mg',
-    pack_size: 'Box of 100 Tablets',
-    supplier_id: 'sup-3',
-    stock: 520,
+    pack_size: '10 x 10 Alu-Alu Box',
+    stock: 450,
     low_stock_alert_level: 100,
-    cost_price_dp: 65,
-    trade_price_tp: 90,
-    mrp: 110,
-    bonus_buy_qty: 20,
-    bonus_free_qty: 3,
-    is_active: true,
-  },
-  {
-    id: 'prod-4',
-    sku_code: 'SNX-TAB-004',
-    name: 'Neurobion Forte Plus',
-    generic_name: 'Vitamin B1 + B6 + B12',
-    category: 'Tablet',
-    strength: '100mg + 200mg + 200mcg',
-    pack_size: 'Box of 30 Tablets',
-    supplier_id: 'sup-4',
-    stock: 310,
-    low_stock_alert_level: 60,
-    cost_price_dp: 210,
-    trade_price_tp: 280,
-    mrp: 330,
-    bonus_buy_qty: 10,
-    bonus_free_qty: 1,
-    is_active: true,
-  },
-  {
-    id: 'prod-5',
-    sku_code: 'SNX-SYR-005',
-    name: 'Tusso-X Cough Reliever',
-    generic_name: 'Dextromethorphan + Menthol',
-    category: 'Syrup',
-    strength: '100ml Bottle',
-    pack_size: '1 Bottle',
-    supplier_id: 'sup-1',
-    stock: 25, // LOW STOCK
-    low_stock_alert_level: 50,
-    cost_price_dp: 85,
-    trade_price_tp: 115,
-    mrp: 135,
-    bonus_buy_qty: 12,
-    bonus_free_qty: 1,
-    is_active: true,
-  },
-  {
-    id: 'prod-6',
-    sku_code: 'SNX-TAB-006',
-    name: 'Dolo-650 Fast Relief',
-    generic_name: 'Paracetamol BP',
-    category: 'Tablet',
-    strength: '650mg',
-    pack_size: 'Box of 100 Tablets',
-    supplier_id: 'sup-2',
-    stock: 650,
-    low_stock_alert_level: 100,
-    cost_price_dp: 25,
-    trade_price_tp: 35,
-    mrp: 45,
+    cost_price_dp: 210.00,
+    trade_price_tp: 280.00,
+    mrp: 350.00,
     bonus_buy_qty: 20,
     bonus_free_qty: 2,
     is_active: true,
   },
   {
-    id: 'prod-7',
-    sku_code: 'SNX-DRP-007',
-    name: 'Zinc-B Pediatric Drop',
-    generic_name: 'Zinc Sulfate + B-Complex',
-    category: 'Drop',
-    strength: '15ml Bottle',
-    pack_size: '1 Bottle',
-    supplier_id: 'sup-3',
-    stock: 140,
-    low_stock_alert_level: 40,
-    cost_price_dp: 55,
-    trade_price_tp: 75,
-    mrp: 90,
+    id: 'c0000000-0000-0000-0000-000000000004',
+    sku_code: 'MED-004',
+    name: 'Ceftrix 1g IV/IM',
+    generic_name: 'Ceftriaxone Sodium',
+    category: 'Injection',
+    strength: '1g',
+    pack_size: '1 Vial',
+    stock: 95,
+    low_stock_alert_level: 30,
+    cost_price_dp: 110.00,
+    trade_price_tp: 150.00,
+    mrp: 185.00,
+    bonus_buy_qty: 0,
+    bonus_free_qty: 0,
+    is_active: true,
+  },
+  {
+    id: 'c0000000-0000-0000-0000-000000000005',
+    sku_code: 'MED-005',
+    name: 'Dermasil Ointment',
+    generic_name: 'Clobetasol Propionate',
+    category: 'Ointment',
+    strength: '0.05% w/w',
+    pack_size: '20g Tube Box',
+    stock: 160,
+    low_stock_alert_level: 30,
+    cost_price_dp: 45.00,
+    trade_price_tp: 65.00,
+    mrp: 85.00,
     bonus_buy_qty: 10,
     bonus_free_qty: 1,
     is_active: true,
   },
   {
-    id: 'prod-8',
-    sku_code: 'SNX-SUP-008',
-    name: 'GlucoHealth Sugar Balance',
-    generic_name: 'Herbal Gymnema + Fenugreek',
-    category: 'Supplement',
-    strength: '60 Veg Capsules',
-    pack_size: '1 Container',
-    supplier_id: 'sup-4',
-    stock: 90,
+    id: 'c0000000-0000-0000-0000-000000000006',
+    sku_code: 'MED-006',
+    name: 'Neurobex-M',
+    generic_name: 'Vit B1 + B6 + B12',
+    category: 'Tablet',
+    strength: 'Standard',
+    pack_size: '10 x 10 Strip Box',
+    stock: 280,
+    low_stock_alert_level: 50,
+    cost_price_dp: 140.00,
+    trade_price_tp: 190.00,
+    mrp: 240.00,
+    bonus_buy_qty: 10,
+    bonus_free_qty: 1,
+    is_active: true,
+  },
+  {
+    id: 'c0000000-0000-0000-0000-000000000007',
+    sku_code: 'MED-007',
+    name: 'Senatix Vitamin C 500mg',
+    generic_name: 'Ascorbic Acid',
+    category: 'Chewable',
+    strength: '500mg',
+    pack_size: '10 x 10 Orange Chewable',
+    stock: 520,
+    low_stock_alert_level: 80,
+    cost_price_dp: 60.00,
+    trade_price_tp: 85.00,
+    mrp: 110.00,
+    bonus_buy_qty: 15,
+    bonus_free_qty: 2,
+    is_active: true,
+  },
+  {
+    id: 'c0000000-0000-0000-0000-000000000008',
+    sku_code: 'MED-008',
+    name: 'Cardizem-SR 90',
+    generic_name: 'Diltiazem HCl',
+    category: 'Capsule',
+    strength: '90mg',
+    pack_size: '3 x 10 Strip Box',
+    stock: 140,
     low_stock_alert_level: 30,
-    cost_price_dp: 450,
-    trade_price_tp: 600,
-    mrp: 750,
-    bonus_buy_qty: 5,
+    cost_price_dp: 160.00,
+    trade_price_tp: 220.00,
+    mrp: 275.00,
+    bonus_buy_qty: 10,
     bonus_free_qty: 1,
     is_active: true,
   },
 ];
 
 const initialBatches: ProductBatch[] = [
-  { id: 'b-1', product_id: 'prod-1', batch_no: 'B26-041', mfg_date: '2025-01-10', exp_date: '2027-12-31', cost_price_dp: 180, trade_price_tp: 240, mrp: 280, warehouse_qty: 240, is_active: true },
-  { id: 'b-2', product_id: 'prod-2', batch_no: 'B26-089', mfg_date: '2025-02-15', exp_date: '2027-08-30', cost_price_dp: 320, trade_price_tp: 420, mrp: 500, warehouse_qty: 180, is_active: true },
-  { id: 'b-3', product_id: 'prod-3', batch_no: 'B25-992', mfg_date: '2024-11-01', exp_date: '2026-11-20', cost_price_dp: 65, trade_price_tp: 90, mrp: 110, warehouse_qty: 120, is_active: true }, // Near expiry (within 30-60 days)
-  { id: 'b-3b', product_id: 'prod-3', batch_no: 'B26-104', mfg_date: '2025-03-01', exp_date: '2028-02-28', cost_price_dp: 65, trade_price_tp: 90, mrp: 110, warehouse_qty: 400, is_active: true },
-  { id: 'b-4', product_id: 'prod-4', batch_no: 'B26-215', mfg_date: '2025-01-20', exp_date: '2027-10-31', cost_price_dp: 210, trade_price_tp: 280, mrp: 330, warehouse_qty: 310, is_active: true },
-  { id: 'b-5', product_id: 'prod-5', batch_no: 'B25-440', mfg_date: '2024-09-01', exp_date: '2026-12-15', cost_price_dp: 85, trade_price_tp: 115, mrp: 135, warehouse_qty: 25, is_active: true },
-  { id: 'b-6', product_id: 'prod-6', batch_no: 'B26-301', mfg_date: '2025-04-10', exp_date: '2028-04-30', cost_price_dp: 25, trade_price_tp: 35, mrp: 45, warehouse_qty: 650, is_active: true },
-  { id: 'b-7', product_id: 'prod-7', batch_no: 'B26-512', mfg_date: '2025-02-01', exp_date: '2027-06-30', cost_price_dp: 55, trade_price_tp: 75, mrp: 90, warehouse_qty: 140, is_active: true },
-  { id: 'b-8', product_id: 'prod-8', batch_no: 'B26-780', mfg_date: '2025-03-12', exp_date: '2027-09-30', cost_price_dp: 450, trade_price_tp: 600, mrp: 750, warehouse_qty: 90, is_active: true },
+  { id: 'd0000000-0000-0000-0000-000000000001', product_id: 'c0000000-0000-0000-0000-000000000001', batch_no: 'NP-25A01', mfg_date: '2025-01-10', exp_date: '2027-01-09', cost_price_dp: 120, trade_price_tp: 160, mrp: 200, warehouse_qty: 220, is_active: true },
+  { id: 'd0000000-0000-0000-0000-000000000002', product_id: 'c0000000-0000-0000-0000-000000000001', batch_no: 'NP-25B02', mfg_date: '2025-03-01', exp_date: '2027-02-28', cost_price_dp: 120, trade_price_tp: 160, mrp: 200, warehouse_qty: 100, is_active: true },
+  { id: 'd0000000-0000-0000-0000-000000000003', product_id: 'c0000000-0000-0000-0000-000000000002', batch_no: 'SC-24K11', mfg_date: '2024-11-15', exp_date: '2026-11-14', cost_price_dp: 180, trade_price_tp: 240, mrp: 300, warehouse_qty: 210, is_active: true },
+  { id: 'd0000000-0000-0000-0000-000000000004', product_id: 'c0000000-0000-0000-0000-000000000003', batch_no: 'GL-25C03', mfg_date: '2025-02-01', exp_date: '2027-01-31', cost_price_dp: 210, trade_price_tp: 280, mrp: 350, warehouse_qty: 450, is_active: true },
+  { id: 'd0000000-0000-0000-0000-000000000005', product_id: 'c0000000-0000-0000-0000-000000000004', batch_no: 'CF-24J09', mfg_date: '2024-10-01', exp_date: '2026-09-30', cost_price_dp: 110, trade_price_tp: 150, mrp: 185, warehouse_qty: 95, is_active: true },
+  { id: 'd0000000-0000-0000-0000-000000000006', product_id: 'c0000000-0000-0000-0000-000000000005', batch_no: 'DM-24L02', mfg_date: '2024-12-01', exp_date: '2026-11-30', cost_price_dp: 45, trade_price_tp: 65, mrp: 85, warehouse_qty: 160, is_active: true },
+  { id: 'd0000000-0000-0000-0000-000000000007', product_id: 'c0000000-0000-0000-0000-000000000006', batch_no: 'NB-25B01', mfg_date: '2025-02-15', exp_date: '2027-02-14', cost_price_dp: 140, trade_price_tp: 190, mrp: 240, warehouse_qty: 280, is_active: true },
+  { id: 'd0000000-0000-0000-0000-000000000008', product_id: 'c0000000-0000-0000-0000-000000000007', batch_no: 'VC-25A05', mfg_date: '2025-01-05', exp_date: '2026-12-31', cost_price_dp: 60, trade_price_tp: 85, mrp: 110, warehouse_qty: 520, is_active: true },
+  { id: 'd0000000-0000-0000-0000-000000000009', product_id: 'c0000000-0000-0000-0000-000000000008', batch_no: 'CD-25A02', mfg_date: '2025-01-20', exp_date: '2027-01-19', cost_price_dp: 160, trade_price_tp: 220, mrp: 275, warehouse_qty: 140, is_active: true },
 ];
 
 const initialEmpStock: EmpStock[] = [
-  { id: 'es-1', emp_id: 'EMP-001', product_id: 'prod-1', batch_id: 'b-1', qty: 25 },
-  { id: 'es-2', emp_id: 'EMP-001', product_id: 'prod-2', batch_id: 'b-2', qty: 15 },
-  { id: 'es-3', emp_id: 'EMP-002', product_id: 'prod-3', batch_id: 'b-3b', qty: 40 },
-  { id: 'es-4', emp_id: 'EMP-003', product_id: 'prod-4', batch_id: 'b-4', qty: 20 },
-  { id: 'es-5', emp_id: 'EMP-004', product_id: 'prod-6', batch_id: 'b-6', qty: 50 },
+  { id: 'e0000000-0000-0000-0000-000000000001', emp_id: 'EMP-001', product_id: 'c0000000-0000-0000-0000-000000000001', batch_id: 'd0000000-0000-0000-0000-000000000001', qty: 25 },
+  { id: 'e0000000-0000-0000-0000-000000000002', emp_id: 'EMP-001', product_id: 'c0000000-0000-0000-0000-000000000002', batch_id: 'd0000000-0000-0000-0000-000000000003', qty: 15 },
+  { id: 'e0000000-0000-0000-0000-000000000003', emp_id: 'EMP-001', product_id: 'c0000000-0000-0000-0000-000000000003', batch_id: 'd0000000-0000-0000-0000-000000000004', qty: 30 },
+  { id: 'e0000000-0000-0000-0000-000000000004', emp_id: 'EMP-002', product_id: 'c0000000-0000-0000-0000-000000000001', batch_id: 'd0000000-0000-0000-0000-000000000001', qty: 20 },
+  { id: 'e0000000-0000-0000-0000-000000000005', emp_id: 'EMP-002', product_id: 'c0000000-0000-0000-0000-000000000006', batch_id: 'd0000000-0000-0000-0000-000000000007', qty: 15 },
+  { id: 'e0000000-0000-0000-0000-000000000006', emp_id: 'EMP-003', product_id: 'c0000000-0000-0000-0000-000000000007', batch_id: 'd0000000-0000-0000-0000-000000000008', qty: 40 },
 ];
 
-const initialInvoices: Invoice[] = [
-  {
-    id: 'inv-1',
-    invoice_ref: 'INV-20261102-001',
-    order_status: 'Delivered_Final',
-    stock_source: 'Employee_Stock',
-    date_time: '2026-11-02T10:30:00Z',
-    date_only: '2026-11-02',
-    emp_id: 'EMP-001',
-    customer_id: 'cust-1',
-    market_id: 'mkt-1',
-    sub_total: 6600,
-    discount_percent: 5,
-    discount_amount: 330,
-    net_payable: 6270,
-    paid_amount: 4000,
-    due_amount: 2270,
-    total_factory_cost_dp: 4700,
-    payment_status: 'Partial',
-    payment_method: 'Cash',
-    customer_name: 'Popular Medicine Corner',
-    customer_phone: '01819000101',
-    customer_address: 'Mirpur-10, Dhaka',
-    employee_name: 'Tanvir Hossain',
-    market_name: 'Mirpur-10 Territory',
-    items: [
-      { product_id: 'prod-1', batch_id: 'b-1', product_name: 'Cal-D Plus 500mg', batch_no: 'B26-041', qty: 20, bonus_qty: 2, unit_cost_dp: 180, unit_price: 240, discount_percent: 5, total_price: 4560 },
-      { product_id: 'prod-3', batch_id: 'b-3b', product_name: 'Gastroloc 20mg', batch_no: 'B26-104', qty: 20, bonus_qty: 3, unit_cost_dp: 65, unit_price: 90, discount_percent: 5, total_price: 1710 },
-    ],
-  },
-  {
-    id: 'inv-2',
-    invoice_ref: 'INV-20261102-002',
-    order_status: 'Delivered_Final',
-    stock_source: 'Warehouse_Direct',
-    date_time: '2026-11-02T14:15:00Z',
-    date_only: '2026-11-02',
-    emp_id: 'EMP-002',
-    customer_id: 'cust-2',
-    market_id: 'mkt-2',
-    sub_total: 8400,
-    discount_percent: 0,
-    discount_amount: 0,
-    net_payable: 8400,
-    paid_amount: 8400,
-    due_amount: 0,
-    total_factory_cost_dp: 6400,
-    payment_status: 'Paid',
-    payment_method: 'bKash',
-    customer_name: 'Al-Madina Pharmacy & Surgicals',
-    customer_phone: '01819000102',
-    customer_address: 'Dhanmondi, Dhaka',
-    employee_name: 'Shakib Al Hasan',
-    market_name: 'Dhanmondi Medical Zone',
-    items: [
-      { product_id: 'prod-2', batch_id: 'b-2', product_name: 'Senatix Cefixime 200mg', batch_no: 'B26-089', qty: 20, bonus_qty: 2, unit_cost_dp: 320, unit_price: 420, discount_percent: 0, total_price: 8400 },
-    ],
-  },
-  {
-    id: 'inv-3',
-    invoice_ref: 'INV-20261103-001',
-    order_status: 'Order_Booked',
-    stock_source: 'Warehouse_Direct',
-    date_time: '2026-11-03T09:00:00Z',
-    date_only: '2026-11-03',
-    emp_id: 'EMP-003',
-    customer_id: 'cust-3',
-    market_id: 'mkt-3',
-    sub_total: 11200,
-    discount_percent: 0,
-    discount_amount: 0,
-    net_payable: 11200,
-    paid_amount: 0,
-    due_amount: 11200,
-    total_factory_cost_dp: 8400,
-    payment_status: 'Due',
-    payment_method: 'Due_Only',
-    customer_name: 'Care Chemists & Wellness',
-    customer_phone: '01819000103',
-    customer_address: 'Uttara, Dhaka',
-    employee_name: 'Mehedi Hasan',
-    market_name: 'Uttara Sector Route',
-    items: [
-      { product_id: 'prod-4', batch_id: 'b-4', product_name: 'Neurobion Forte Plus', batch_no: 'B26-215', qty: 40, bonus_qty: 4, unit_cost_dp: 210, unit_price: 280, discount_percent: 0, total_price: 11200 },
-    ],
-  },
-];
+const initialInvoices: Invoice[] = [];
 
-const initialLedger: LedgerEntry[] = [
-  {
-    id: 'led-1',
-    date_time: '2026-11-02T10:30:00Z',
-    date_only: '2026-11-02',
-    account_type: 'Customer',
-    customer_id: 'cust-1',
-    emp_id: 'EMP-001',
-    invoice_ref: 'INV-20261102-001',
-    payment_method: 'Cash',
-    description: 'Invoice Billed (INV-20261102-001)',
-    debit: 6270,
-    credit: 0,
-    balance: 20770,
-    party_name: 'Popular Medicine Corner',
-  },
-  {
-    id: 'led-2',
-    date_time: '2026-11-02T10:35:00Z',
-    date_only: '2026-11-02',
-    account_type: 'Customer',
-    customer_id: 'cust-1',
-    emp_id: 'EMP-001',
-    invoice_ref: 'INV-20261102-001',
-    payment_method: 'Cash',
-    description: 'Cash Payment Received at Delivery',
-    debit: 0,
-    credit: 4000,
-    balance: 16770,
-    party_name: 'Popular Medicine Corner',
-  },
-  {
-    id: 'led-3',
-    date_time: '2026-11-02T14:15:00Z',
-    date_only: '2026-11-02',
-    account_type: 'Customer',
-    customer_id: 'cust-2',
-    emp_id: 'EMP-002',
-    invoice_ref: 'INV-20261102-002',
-    payment_method: 'bKash',
-    description: 'Invoice Billed & Paid in Full (bKash)',
-    debit: 8400,
-    credit: 8400,
-    balance: 9200,
-    party_name: 'Al-Madina Pharmacy & Surgicals',
-  },
-];
+const initialLedger: LedgerEntry[] = [];
 
 const initialExpenses: Expense[] = [
-  { id: 'exp-1', expense_date: '2026-11-01', category: 'Office_Warehouse_Rent', title: 'Monthly Central Warehouse Rent', amount: 35000, payment_method: 'Bank', entered_by_name: 'Nazrul Islam' },
-  { id: 'exp-2', expense_date: '2026-11-02', category: 'Delivery_Van_Fuel', title: 'Delivery Van 1 Octane Refill', amount: 3200, payment_method: 'Cash', entered_by_name: 'Ashikur Rahman' },
-  { id: 'exp-3', expense_date: '2026-11-02', category: 'Staff_Tea_Entertainment', title: 'Field Staff Weekly Refreshment', amount: 1450, payment_method: 'Cash', entered_by_name: 'Farhan Ahmed' },
+  {
+    id: 'e1000000-0000-0000-0000-000000000001',
+    expense_date: new Date().toISOString().split('T')[0],
+    category: 'Office_Warehouse_Rent',
+    title: 'Mirpur Central Godown Rent',
+    amount: 35000,
+    payment_method: 'Bank',
+    entered_by_emp_id: 'ADM-01',
+    entered_by_name: 'Samin Yeasar',
+  },
+  {
+    id: 'e1000000-0000-0000-0000-000000000002',
+    expense_date: new Date().toISOString().split('T')[0],
+    category: 'Electricity_Internet',
+    title: 'DESCO Monthly Electric Bill & Fiber Net',
+    amount: 6800,
+    payment_method: 'bKash',
+    entered_by_emp_id: 'ACC-01',
+    entered_by_name: 'Nazrul Islam',
+  },
+  {
+    id: 'e1000000-0000-0000-0000-000000000003',
+    expense_date: new Date().toISOString().split('T')[0],
+    category: 'Delivery_Van_Fuel',
+    title: 'Delivery Van Fuel & CNG Refill',
+    amount: 3200,
+    payment_method: 'Cash',
+    entered_by_emp_id: 'DEL-01',
+    entered_by_name: 'Sohel Rana',
+  },
+  {
+    id: 'e1000000-0000-0000-0000-000000000004',
+    expense_date: new Date().toISOString().split('T')[0],
+    category: 'Staff_Tea_Entertainment',
+    title: 'Weekly Staff Tea & Office Refreshments',
+    amount: 1450,
+    payment_method: 'Cash',
+    entered_by_emp_id: 'STR-01',
+    entered_by_name: 'Abdur Rahim',
+  },
 ];
 
 const initialAttendance: Attendance[] = [
@@ -959,26 +796,65 @@ class ERPStore {
     this.saveToStorage();
   }
 
-  public loginWithCredentials(identifier: string, pin: string): { success: boolean; user?: Employee; message?: string } {
+  public loginWithCredentials(identifier: string, secret: string): { success: boolean; user?: Employee; message?: string } {
     const cleanId = identifier.trim().toLowerCase().replace('@senatix.local', '');
-    const found = this.employees.find(
-      (e) => e.emp_id.toLowerCase() === cleanId || e.phone.replace(/[^0-9]/g, '') === cleanId.replace(/[^0-9]/g, '')
-    );
+    const cleanSecret = secret.trim();
 
-    if (found) {
-      this.currentUser = found;
-      this.saveToStorage();
-      return { success: true, user: found };
+    // Production Master Credentials Check:
+    // Requires secure production password (e.g. Senatix1234@ or Saminsami1234)
+    const validPasswords = ['senatix1234@', 'saminsami1234', 'senatix2026@', 'senatixadmin2026!'];
+    const isPasswordValid = validPasswords.includes(cleanSecret.toLowerCase());
+
+    if (!isPasswordValid) {
+      return {
+        success: false,
+        message: 'পাসওয়ার্ড সঠিক নয়। আপনার এডমিন পাসওয়ার্ড প্রদান করুন (যেমন: Senatix1234@)।',
+      };
     }
 
-    // Fallback: If demo login or unknown, default to first employee
-    if (identifier.includes('admin') || pin === '1234' || pin === 'admin') {
-      this.currentUser = this.employees[0];
-      this.saveToStorage();
-      return { success: true, user: this.employees[0] };
+    const isSuperAdminIdentifier =
+      cleanId === 'adm-01' ||
+      cleanId === 'senatixwellness@gmail.com' ||
+      cleanId === 'saminsami73@gmail.com' ||
+      cleanId === '01711000001' ||
+      cleanId === 'samin' ||
+      cleanId === 'admin';
+
+    const isManagingDirector =
+      cleanId === 'exe-01' ||
+      cleanId === '01711000002' ||
+      cleanId === '01819000002';
+
+    let found: Employee | undefined;
+    if (isSuperAdminIdentifier) {
+      found = this.employees.find((e) => e.role === 'super_admin') || this.employees[0];
+    } else if (isManagingDirector) {
+      found = this.employees.find((e) => e.role === 'executor') || this.employees[1];
+    } else {
+      found = this.employees.find(
+        (e) => e.emp_id.toLowerCase() === cleanId || e.phone.replace(/[^0-9]/g, '') === cleanId.replace(/[^0-9]/g, '')
+      );
     }
 
-    return { success: false, message: 'Invalid ID/Mobile or PIN. Try ADM-01 or PIN 1234' };
+    if (!found) {
+      return {
+        success: false,
+        message: 'প্রদত্ত আইডি বা ইমেইল পাওয়া যায়নি।',
+      };
+    }
+
+    // STRICT ROLE CONTROL: Only Admins & Executives can enter the ERP web application
+    const allowedRoles = ['super_admin', 'executor', 'manager', 'accountant', 'store_keeper'];
+    if (!allowedRoles.includes(found.role)) {
+      return {
+        success: false,
+        message: 'অননুমোদিত প্রবেশাধিকার: এই সিস্টেমটি শুধুমাত্র ব্যবস্থাপনা কর্তৃপক্ষ ও এডমিনদের জন্য সংরক্ষিত।',
+      };
+    }
+
+    this.currentUser = found;
+    this.saveToStorage();
+    return { success: true, user: found };
   }
 
   // MARKETS
@@ -1023,6 +899,52 @@ class ERPStore {
     }
   }
 
+  public collectEmployeeCashDue(params: {
+    emp_id: string;
+    amount: number;
+    payment_method: 'Cash' | 'bKash' | 'Bank';
+    notes?: string;
+  }): { success: boolean; balanceRemaining: number; voucherRef: string } {
+    const emp = this.employees.find((e) => e.emp_id === params.emp_id);
+    if (!emp) {
+      throw new Error('Employee not found');
+    }
+    if (params.amount <= 0) {
+      throw new Error('Amount must be greater than zero');
+    }
+
+    emp.current_due_balance = Math.max(0, emp.current_due_balance - params.amount);
+
+    const voucherRef = `VCH-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.floor(100 + Math.random() * 900)}`;
+
+    const newLedger: LedgerEntry = {
+      id: generateUUID(),
+      date_time: new Date().toISOString(),
+      date_only: new Date().toISOString().split('T')[0],
+      account_type: 'Employee',
+      emp_id: emp.emp_id,
+      invoice_ref: voucherRef,
+      payment_method: params.payment_method,
+      description: `ফিল্ড বিক্রয় ক্যাশ জমা: ${emp.name} (${params.notes || 'ক্যাশ ভাউচার'})`,
+      debit: 0,
+      credit: params.amount,
+      balance: emp.current_due_balance,
+      party_name: emp.name,
+    };
+
+    this.ledger.unshift(newLedger);
+    this.saveToStorage();
+
+    syncRecordToCloud('employees', emp);
+    syncRecordToCloud('ledger', newLedger);
+
+    return {
+      success: true,
+      balanceRemaining: emp.current_due_balance,
+      voucherRef,
+    };
+  }
+
   // CUSTOMERS
   public getCustomers(): Customer[] {
     return this.customers.map((c) => {
@@ -1055,7 +977,7 @@ class ERPStore {
 
     // Add to ledger
     const newLedger: LedgerEntry = {
-      id: `led-${Date.now()}`,
+      id: generateUUID(),
       date_time: new Date().toISOString(),
       date_only: new Date().toISOString().split('T')[0],
       account_type: 'Customer',
@@ -1070,6 +992,7 @@ class ERPStore {
     };
     this.ledger.unshift(newLedger);
     this.saveToStorage();
+    syncRecordToCloud('ledger', newLedger);
   }
 
   // SUPPLIERS

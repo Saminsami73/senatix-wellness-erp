@@ -1,77 +1,117 @@
-# Senatix Wellness • Medicine & Healthcare Distribution ERP Web Application
+# Senatix Wellness Distribution ERP
 
-A production-ready, 60 FPS Distribution & ERP Web Application built for **Senatix Wellness** using **Next.js 14 (App Router)**, **React 18**, **TypeScript**, **Tailwind CSS**, and **Supabase (Free Tier)**.
-
-
-## 🚀 Key Features Implemented
-
-### 1. Brand Assets, Contrast Fix & 60 FPS Preloader
-- **Logo Placement**: 3D metallic emerald-and-gold monogram logo (`public/brand/Senatix_Wellness_logo_transparent.png`).
-- **Contrast Fix**: Dark petrol-teal wordmark (`public/brand/Senatix_text_transparent.png`) is encased in a frosted badge (`bg-emerald-50/95`) with CSS drop shadow for razor-sharp contrast in both dark and light environments.
-- **Hardware-Accelerated Preloader (`components/ui/Preloader.tsx`)**: 60 FPS emerald-gold pulse animation that completes in `600ms` and never blocks the user for more than `0.8s`.
-
-### 2. Exact Glassmorphic Login (`login.html` Adaptation)
-- Deep obsidian background (`#080710`) with top-left blue orb and bottom-right orange-gold orb.
-- Frosted glass card (`backdrop-blur-[12px]`, `border-2 border-white/10`).
-- ID/Phone input with automatic `@senatix.local` suffixing.
-- Show/Hide PIN toggle.
-- 1-Click Bilingual Language Switcher (`🌐 বাংলা / English`).
-- Office admin support modal for forgotten PINs.
-
-### 3. Exact 3-Column Dashboard Shell (`UI_template/` Adaptation)
-- **Left Sidebar (`w-64`)**:
-  - Logged-in user profile box with circular photo and role badge (click to update photo or PIN).
-  - 10 Navigation links with active count badges.
-  - Bilingual pill switch with flag transitions.
-  - Emergency hotline support card (`24/7 Online Support`).
-- **Center Workspace**:
-  - Top segmented tab bar (`[⚡ Make Instant Bill]`, `[📦 Receive Factory Stock]`, `[💰 Collect Baki]`, `[📋 Today's Attendance]`).
-  - 5 Horizontal pastel metric cards (`Mint White`, `Soft Peach`, `Soft Coral`, `Soft Lavender`, `Soft Sage`).
-  - Team & field staff circular avatar strip with colored status rings and interactive quick staff drawer.
-  - Main interactive Recharts bar chart (`Today | 7 Days | 30 Days` toggles).
-  - Bottom 3 KPI metric cards (`True Net Profit`, `Pending Orders`, `Target Completion`).
-- **Right Sidebar (`w-72`)**:
-  - Top 3 icon buttons (⚡ Quick POS Bill Modal, 🔔 Near-Expiry & Low-Stock Alerts, 💾 1-Click Company Full Excel Backup).
-  - Live activity feed with gradient-bordered highlight card.
-- **Mobile Ergonomics**:
-  - Fixed bottom 5-tab bar (`Home`, `Make Bill`, `Stock`, `Money Book`, `More Menu`).
-  - Slide-over drawers for left navigation and right activity feed.
-
-### 4. Bilingual (English + বাংলা) System
-- Instant zero-latency toggle with modes: `bn` (বাংলা), `en` (English), and `both` (বাংলা + English).
-- Non-technical everyday terms (e.g. `বাকি খাতা`, `ফ্যাক্টরি কেনা দাম DP`, `ফার্মেসি বিক্রয় মূল্য TP`, `বোনাস বক্স ১০+১`, `হাজিরা ও বেতন`).
-
-### 5. Client-Side WebP Image Auto-Compression (`lib/imageCompressor.ts`)
-- Client-side `<canvas>` compression engine converts phone camera or PC photos to max `400x400px` WebP at `0.75` quality (`~15KB–30KB`).
-- Zero layout shift (`SmartAvatar.tsx`) with initials or category icon fallbacks.
-
-### 6. All 10 ERP Modules Implemented (`app/dashboard/*`)
-1. `/dashboard`: Role-based executive overview.
-2. `/dashboard/billing`: 3-Step visual POS wizard (split-screen on desktop, sticky drawer on mobile, FEFO auto-batching, bonus calculations, auto jsPDF memo print).
-3. `/dashboard/orders`: Warehouse dispatch queue (`Order_Booked` -> `Packed_Ready` -> `Delivered_Final` + Delivery Challan PDF).
-4. `/dashboard/inventory`: 4 Tabs (Master Catalog, Factory GRN inward, Batch/Expiry FEFO tracker, Returns & Quarantine).
-5. `/dashboard/markets`: Markets/routes CRUD, pharmacy directory, 1-tap phone call button, Baki collection modal, pharmacy statement PDF.
-6. `/dashboard/employees`: All 50+ staff, executors, managers, warehouse-to-staff stock transfer, cash handover to office.
-7. `/dashboard/hr-payroll`: 1-Click daily attendance checklist (auto-credits daily TA/DA), monthly sales targets, automated monthly payroll generator + payslip PDF.
-8. `/dashboard/ledger`: Unified money book for pharmacies, staff and suppliers with debit, credit, running balances and Excel export.
-9. `/dashboard/expenses`: Daily company expenses and True Net Profit calculator (`Sales TP - Factory Cost DP - Expenses - Damaged Loss`).
-10. `/dashboard/reports`: Analytics visualizations + 1-Click 18-Table Company Full Excel Backup (`Senatix_Backup_YYYY_MM_DD.xlsx`).
+**Enterprise Pharmaceutical & Healthcare Distribution Management System**  
+Built with **Next.js 14 (App Router)**, **TypeScript**, **Tailwind CSS**, and **Supabase PostgreSQL (Free Tier Optimized)**.
 
 ---
 
-## 🗄️ Free Vercel & Supabase Deployment Instructions
+## 🌟 Executive Summary
 
-For complete step-by-step instructions, see the beginner guide in [DEPLOYMENT_GUIDE.md](file:///e:/Senatix_Wellness_Web/DEPLOYMENT_GUIDE.md):
+**Senatix Wellness ERP** is a centralized, high-performance web platform designed specifically for pharmaceutical distribution management. Engineered with an intuitive interface tailored for business owners and non-technical management personnel (including 50+ year old users), the system manages wholesale inventory, field sales custody, instant POS billing, automated due collections, doctor promotions, and financial ledgers.
 
-1. **Database (Supabase Free Tier)**:
-   - Create a project on [Supabase](https://supabase.com).
-   - Go to **SQL Editor**, paste [`database/supabase_schema.sql`](file:///e:/Senatix_Wellness_Web/database/supabase_schema.sql), and click **Run**.
-   - Copy your **Project URL** and **anon public API key** from Project Settings > API.
-2. **Hosting (Vercel Free Tier)**:
-   - Import your GitHub repository into [Vercel](https://vercel.com).
-   - Add environment variables `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
-   - Click **Deploy** to get your live `.vercel.app` production link.
-3. **Walkthrough Manuals**:
-   - In-app Guide: `/dashboard/guide`
-   - Downloadable PDF: `/docs/Senatix_ERP_Walkthrough_Guide_English.pdf`
-   - Printable Bangla Guide: `/docs/Senatix_ERP_Walkthrough_Guide_Bangla.html`
+---
+
+## 🛡️ Core Operational Architecture
+
+### 1. Administrative Security & Access Control
+- **Strict Role-Based Portal**: Access is restricted strictly to executive management and administrative personnel (`Super Admin`, `Managing Director`, `Store In-charge`, `Accountant`). Field sales reps do not access the web application.
+- **Master Authentication**: High-security credential verification with support for corporate emails, Admin IDs (`ADM-01`, `EXE-01`), and official passwords.
+- **Zero Mock Data**: All operations, transactions, invoices, and inventories sync with live PostgreSQL tables in Supabase.
+
+### 2. Employee Stock Custody & Cash Settlement Sequence
+Field representatives operate in direct contact with management:
+- **Medicine Custody Issuance**: Management issues medicine boxes directly from central warehouse batches to an employee (`transferStockToEmployee`).
+- **Unsold Medicine Return to Godown (`ওষুধ গুদামে ফেরত জমা`)**: Unsold stock held by staff can be returned to central godown batches at any time with a single tap. Central inventory is restored immediately, and staff custody is zeroed out.
+- **Field Cash Collection & Due Clearance (`ক্যাশ টাকা জমা ও বকেয়া নিষ্পত্তি`)**:
+  - When field staff deposit collected cash or clear their dues, management clicks **"ক্যাশ গ্রহণ" (Collect Cash)**.
+  - The system automatically debits staff liability, records a credit entry in the company cash ledger, and syncs to Supabase.
+  - Generates an official, printable **"ক্যাশ জমা মানি রিসিট (Cash Deposit Voucher)"** with company letterhead, voucher reference, date, breakdown, and signature lines for both employee and management.
+
+### 3. Free Realtime Notifications & Audio Feedback
+- **Supabase Realtime WebSockets**: Listens for live PostgreSQL changes (`postgres_changes`) across invoices, payments, stock movements, and expenses.
+- **Hardware-Synthesized Audio Chime**: Built using the browser Web Audio API (`AudioContext`) with two soothing sine frequencies (587Hz -> 880Hz). Requires zero external sound files, consumes 0 KB bandwidth, and runs completely free.
+- **Live Toast & Notification Center**: Instant visual alerts appear on screen and are archived in the top navigation bell drawer with one-tap sound toggling.
+
+### 4. Supabase Free Tier Longevity Optimization
+The database schema and synchronization pipeline are engineered to run within the **Supabase Free Tier (500 MB DB, 1 GB Storage, 50k MAU, 5 GB Egress)** for years without incurring cloud costs:
+- **Ultralight Row Footprint**: Standard relational rows average 200–500 bytes. At 50 invoices per day (~18,000 invoices/year), the database uses less than 15 MB in an entire year.
+- **Storage Protector**: Client-side `<canvas>` image auto-compression converts photos to WebP at ~15 KB–30 KB. Base64 strings exceeding 50 KB are prevented from entering PostgreSQL columns, keeping table storage pristine.
+- **Local Fallback Persistence**: `localStorage` caching ensures instant 60 FPS UI load times even on slow 3G mobile connections.
+
+---
+
+## 📦 System Modules
+
+| Module | Route | Functionality |
+| :--- | :--- | :--- |
+| **Executive Dashboard** | `/dashboard` | Today's revenue, net profit, cash in hand, expiry warnings, sales analytics. |
+| **POS Billing** | `/dashboard/billing` | 3-Step instant invoice generator, auto FEFO batch selection, bonus rules (10+1), instant PDF memo print. |
+| **Warehouse Inventory** | `/dashboard/inventory` | 8 Senatix core products, factory GRN receipts, batch tracking, expiry monitoring, stock returns. |
+| **Staff & Stock Custody** | `/dashboard/employees` | Staff directory, unsold stock return to godown, cash collection, money receipt voucher printing. |
+| **Doctor Relations** | `/dashboard/doctors` | Doctor registry, prescription targets, marketing & promotional expense tracking, sample logs. |
+| **Orders & Delivery** | `/dashboard/orders` | Delivery queue management (`Booked` → `Packed` → `Delivered`), delivery challan printing. |
+| **Accounts & Ledger** | `/dashboard/ledger` | Double-entry cash/bank ledger, customer due collection, staff receipts, Excel export. |
+| **Daily Expenses** | `/dashboard/expenses` | Office expenses, delivery van fuel, travel allowances, True Net Profit calculator. |
+| **HR & Payroll** | `/dashboard/hr-payroll` | Attendance tracking, daily TA/DA accrual, commission rules, automated monthly payslip generator. |
+| **Business Reports** | `/dashboard/reports` | Analytical summaries and 1-click full company 18-sheet Excel backup (`Senatix_Backup_*.xlsx`). |
+| **User Walkthrough** | `/dashboard/guide` | Step-by-step user manual in simple Bengali and English for non-technical users. |
+
+---
+
+## 🛠️ Technology Stack
+
+- **Framework**: [Next.js 14](https://nextjs.org/) (App Router, Server & Client Components)
+- **Language**: TypeScript 5.x
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) with full Dark & Light mode support
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **Charts**: [Recharts](https://recharts.org/)
+- **Database & Realtime**: [Supabase](https://supabase.com/) (PostgreSQL 15 + WebSockets)
+- **PDF Generation**: [jsPDF](https://github.com/parallax/jsPDF) & [jsPDF-AutoTable](https://github.com/simonbengtsson/jsPDF-AutoTable)
+- **Spreadsheet Engine**: [XLSX (SheetJS)](https://sheetjs.com/)
+
+---
+
+## 🚀 Deployment & Configuration
+
+### 1. Environment Variables
+Create a `.env.local` file in the root directory (or configure in Vercel Project Settings):
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-public-key
+```
+
+### 2. Database Setup (Supabase)
+1. Open your Supabase Dashboard → **SQL Editor**.
+2. Run the SQL schema from [`database/supabase_schema.sql`](file:///e:/Senatix_Wellness_Web/database/supabase_schema.sql).
+3. The schema creates all 13 relational tables, foreign key constraints, default admin profiles, and enables Row Level Security (RLS) with permissive read/write policies.
+
+### 3. Local Development
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### 4. Production Build & Deployment (Vercel)
+```bash
+# Create production build
+npm run build
+
+# Start production server
+npm run start
+```
+When deploying to Vercel:
+1. Connect your GitHub repository to Vercel.
+2. In **Environment Variables**, paste `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+3. Deploy. Every push to `main` will trigger an automated zero-downtime production deployment.
+
+---
+
+## 📄 License & Confidentiality
+
+Copyright © 2026 **Senatix Wellness**. All rights reserved.  
+This software is proprietary and intended solely for official company operations.

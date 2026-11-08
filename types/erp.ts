@@ -343,7 +343,7 @@ export interface Doctor {
   specialty: string;
   hospital_chamber: string;
   phone: string;
-  market_id: string;
+  market_id?: string | null;
   assigned_emp_id?: string | null;
   prescriptions_written_monthly: number;
   total_promotional_expense: number;

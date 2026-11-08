@@ -121,6 +121,13 @@ function sanitizeForCloud(tableName: string, record: any): any {
     }
   }
 
+  // Free-Tier Storage Optimization: prevent database ballooning from oversized base64 strings
+  if (clean.image_url && typeof clean.image_url === 'string' && clean.image_url.startsWith('data:') && clean.image_url.length > 50000) {
+    // If an uncompressed huge base64 is passed, avoid storing it in PostgreSQL text column
+    // to preserve 500MB free tier quota
+    clean.image_url = null;
+  }
+
   // Nullify optional UUID foreign keys if they are not valid UUIDs
   const optionalUuidFields = ['supplier_id', 'market_id', 'batch_id', 'invoice_id'];
   for (const field of optionalUuidFields) {
