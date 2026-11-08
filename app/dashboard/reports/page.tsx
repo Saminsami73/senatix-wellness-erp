@@ -70,14 +70,28 @@ export default function ReportsAndBackupPage() {
     TP: p.trade_price_tp,
   }));
 
-  const marketPieData = [
-    { name: 'Mirpur-10', value: 38 },
-    { name: 'Dhanmondi', value: 27 },
-    { name: 'Uttara', value: 20 },
-    { name: 'Mohakhali', value: 15 },
-  ];
+  // Dynamically calculate territory sales distribution from real invoices and markets
+  const markets = erpStore.getMarkets();
 
-  const PIE_COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ec4899'];
+  const marketMap: Record<string, number> = {};
+  invoices.forEach((inv) => {
+    if (inv.order_status !== 'Cancelled') {
+      const mkt = markets.find((m) => m.id === inv.market_id);
+      const name = mkt ? mkt.name : (mode === 'bn' ? 'সরাসরি বিক্রয়' : 'Direct Sales');
+      marketMap[name] = (marketMap[name] || 0) + Number(inv.net_payable || 0);
+    }
+  });
+
+  const totalMarketSales = Object.values(marketMap).reduce((a, b) => a + b, 0);
+
+  const marketPieData = totalMarketSales > 0
+    ? Object.entries(marketMap).map(([name, val]) => ({
+        name,
+        value: Math.round((val / totalMarketSales) * 100),
+      }))
+    : [];
+
+  const PIE_COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4'];
 
   return (
     <div className="space-y-4">
@@ -162,35 +176,45 @@ export default function ReportsAndBackupPage() {
           </div>
 
           <div className="h-60 w-full pt-2">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={topProductsData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#252628" vertical={false} />
-                <XAxis dataKey="name" stroke="#606165" fontSize={11} tickLine={false} />
-                <YAxis stroke="#606165" fontSize={11} tickLine={false} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#15161c',
-                    borderColor: '#252628',
-                    borderRadius: '8px',
-                    color: '#fff',
-                    fontSize: '12px',
-                  }}
-                />
-                <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '8px' }} />
-                <Bar
-                  dataKey="Stock"
-                  name={mode === 'bn' ? 'মজুত (বক্স)' : 'Stock (Boxes)'}
-                  fill="#10b981"
-                  radius={[4, 4, 0, 0]}
-                />
-                <Bar
-                  dataKey="TP"
-                  name={mode === 'bn' ? 'বিক্রয় দর (টাকা)' : 'Trade Price (Tk)'}
-                  fill="#3b82f6"
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
+            {topProductsData.length === 0 ? (
+              <div className="h-full w-full flex flex-col items-center justify-center text-zinc-500 text-xs text-center p-4 border border-dashed border-[#252628] rounded-xl space-y-1">
+                <BarChart2 className="size-8 text-zinc-600 mb-1" />
+                <p>{mode === 'bn' ? 'কোনো ওষুধ এখনও মজুত নেই।' : 'No medicines in inventory yet.'}</p>
+                <p className="text-[11px] text-zinc-600">
+                  {mode === 'bn' ? 'ইনভেন্টরিতে ওষুধ যোগ করলে মজুত চার্ট দেখা যাবে।' : 'Stock chart will populate once products are added.'}
+                </p>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={topProductsData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#252628" vertical={false} />
+                  <XAxis dataKey="name" stroke="#606165" fontSize={11} tickLine={false} />
+                  <YAxis stroke="#606165" fontSize={11} tickLine={false} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#15161c',
+                      borderColor: '#252628',
+                      borderRadius: '8px',
+                      color: '#fff',
+                      fontSize: '12px',
+                    }}
+                  />
+                  <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '8px' }} />
+                  <Bar
+                    dataKey="Stock"
+                    name={mode === 'bn' ? 'মজুত (বক্স)' : 'Stock (Boxes)'}
+                    fill="#10b981"
+                    radius={[4, 4, 0, 0]}
+                  />
+                  <Bar
+                    dataKey="TP"
+                    name={mode === 'bn' ? 'বিক্রয় দর (টাকা)' : 'Trade Price (Tk)'}
+                    fill="#3b82f6"
+                    radius={[4, 4, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
 
@@ -209,34 +233,44 @@ export default function ReportsAndBackupPage() {
           </div>
 
           <div className="h-60 w-full flex items-center justify-center">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={marketPieData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={50}
-                  outerRadius={80}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {marketPieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#15161c',
-                    borderColor: '#252628',
-                    borderRadius: '8px',
-                    color: '#fff',
-                    fontSize: '12px',
-                  }}
-                  formatter={(value: any) => [`${value}%`, mode === 'bn' ? 'শেয়ার' : 'Share']}
-                />
-                <Legend wrapperStyle={{ fontSize: '11px' }} />
-              </PieChart>
-            </ResponsiveContainer>
+            {marketPieData.length === 0 ? (
+              <div className="h-full w-full flex flex-col items-center justify-center text-zinc-500 text-xs text-center p-4 border border-dashed border-[#252628] rounded-xl space-y-1">
+                <PieIcon className="size-8 text-zinc-600 mb-1" />
+                <p>{mode === 'bn' ? 'কোনো আঞ্চলিক বিক্রয় এখনও রেকর্ড হয়নি।' : 'No regional sales recorded yet.'}</p>
+                <p className="text-[11px] text-zinc-600">
+                  {mode === 'bn' ? 'চালান তৈরি করলে এলাকাভিত্তিক মার্কেট শেয়ার পাই-চার্ট প্রদর্শিত হবে।' : 'Territory distribution will populate upon billing.'}
+                </p>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={marketPieData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {marketPieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#15161c',
+                      borderColor: '#252628',
+                      borderRadius: '8px',
+                      color: '#fff',
+                      fontSize: '12px',
+                    }}
+                    formatter={(value: any) => [`${value}%`, mode === 'bn' ? 'শেয়ার' : 'Share']}
+                  />
+                  <Legend wrapperStyle={{ fontSize: '11px' }} />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
       </div>

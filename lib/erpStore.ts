@@ -152,6 +152,7 @@ class ERPStore {
   private doctors: Doctor[] = initialDoctors;
   private doctorExpenses: DoctorExpense[] = initialDoctorExpenses;
   private activePortal: 'hq' | 'field' = 'hq';
+  private monthlySalesTarget: number = 0;
 
   private currentUser: Employee = initialEmployees[0]; // Default Super Admin for instant preview
   private listeners: Set<() => void> = new Set();
@@ -308,6 +309,7 @@ class ERPStore {
       localStorage.setItem('senatix_erp_doctor_expenses', JSON.stringify(this.doctorExpenses));
       localStorage.setItem('senatix_erp_portal', this.activePortal);
       localStorage.setItem('senatix_erp_user', JSON.stringify(this.currentUser));
+      localStorage.setItem('senatix_monthly_sales_target', this.monthlySalesTarget.toString());
     } catch (e) {
       console.warn('Storage save error:', e);
     }
@@ -358,6 +360,8 @@ class ERPStore {
       this.doctorExpenses = get('senatix_erp_doctor_expenses') || initialDoctorExpenses;
       this.activePortal = (localStorage.getItem('senatix_erp_portal') as 'hq' | 'field') || 'hq';
       this.currentUser = get('senatix_erp_user') || initialEmployees[0];
+      const savedTarget = localStorage.getItem('senatix_monthly_sales_target');
+      this.monthlySalesTarget = savedTarget ? parseFloat(savedTarget) || 0 : 0;
       this.initialized = true;
     } catch (e) {
       console.warn('Storage load error:', e);
@@ -1673,6 +1677,190 @@ class ERPStore {
   // TARGETS
   public getTargets(): EmployeeTarget[] {
     return this.targets;
+  }
+
+  public getMonthlyTargetData() {
+    const currentMonth = new Date().toISOString().slice(0, 7); // e.g. "2026-11"
+
+    const staffTargetTotal = this.targets
+      .filter((t) => t.month_year === currentMonth)
+      .reduce((acc, t) => acc + Number(t.target_sales_amount || 0), 0);
+
+    const targetAmount = this.monthlySalesTarget > 0 ? this.monthlySalesTarget : staffTargetTotal;
+
+    const currentMonthSales = this.invoices
+      .filter((i) => i.date_only && i.date_only.startsWith(currentMonth) && i.order_status !== 'Cancelled')
+      .reduce((acc, i) => acc + Number(i.net_payable || 0), 0);
+
+    const currentMonthCollection = this.ledger
+      .filter((l) => l.date_only && l.date_only.startsWith(currentMonth) && l.credit > 0)
+      .reduce((acc, l) => acc + Number(l.credit || 0), 0);
+
+    const percentage = targetAmount > 0 ? Math.min(100, Math.round((currentMonthSales / targetAmount) * 100)) : 0;
+    const remaining = targetAmount > 0 ? Math.max(0, targetAmount - currentMonthSales) : 0;
+
+    return {
+      currentMonth,
+      targetAmount,
+      currentMonthSales,
+      currentMonthCollection,
+      percentage,
+      remaining,
+      isTargetSet: targetAmount > 0,
+    };
+  }
+
+  public setMonthlyCompanyTarget(amount: number) {
+    this.monthlySalesTarget = Math.max(0, amount);
+    this.saveToStorage();
+    this.notify();
+  }
+
+  // REAL SALES VS COLLECTION TRENDS (100% ACCURATE METRICS)
+  public getSalesVsCollectionTrends(range: 'today' | '7d' | '30d'): {
+    bn: { name: string; Sales: number; Collection: number }[];
+    en: { name: string; Sales: number; Collection: number }[];
+    hasData: boolean;
+  } {
+    const today = new Date();
+    const todayDateStr = today.toISOString().split('T')[0];
+
+    if (range === 'today') {
+      const slots = [
+        { hour: 9, label_bn: 'সকাল ৯টা', label_en: '09:00 AM' },
+        { hour: 11, label_bn: 'সকাল ১১টা', label_en: '11:00 AM' },
+        { hour: 13, label_bn: 'দুপুর ১টা', label_en: '01:00 PM' },
+        { hour: 15, label_bn: 'বিকাল ৩টা', label_en: '03:00 PM' },
+        { hour: 18, label_bn: 'সন্ধ্যা ৬টা', label_en: '06:00 PM' },
+      ];
+
+      const todayInvoices = this.invoices.filter(
+        (i) => i.date_only === todayDateStr && i.order_status !== 'Cancelled'
+      );
+      const todayLedger = this.ledger.filter(
+        (l) => l.date_only === todayDateStr && l.credit > 0
+      );
+
+      let totalSales = 0;
+      let totalColl = 0;
+
+      const bn = slots.map((s, idx) => {
+        const prevHour = idx === 0 ? 0 : slots[idx - 1].hour;
+        const salesInSlot = todayInvoices
+          .filter((i) => {
+            const d = new Date(i.date_time);
+            const h = isNaN(d.getTime()) ? 10 : d.getHours();
+            return h > prevHour && h <= s.hour;
+          })
+          .reduce((acc, i) => acc + Number(i.net_payable || 0), 0);
+
+        const collInSlot = todayLedger
+          .filter((l) => {
+            const d = new Date(l.date_time);
+            const h = isNaN(d.getTime()) ? 10 : d.getHours();
+            return h > prevHour && h <= s.hour;
+          })
+          .reduce((acc, l) => acc + Number(l.credit || 0), 0);
+
+        totalSales += salesInSlot;
+        totalColl += collInSlot;
+
+        return { name: s.label_bn, Sales: salesInSlot, Collection: collInSlot };
+      });
+
+      const en = slots.map((s, idx) => {
+        const prevHour = idx === 0 ? 0 : slots[idx - 1].hour;
+        const salesInSlot = todayInvoices
+          .filter((i) => {
+            const d = new Date(i.date_time);
+            const h = isNaN(d.getTime()) ? 10 : d.getHours();
+            return h > prevHour && h <= s.hour;
+          })
+          .reduce((acc, i) => acc + Number(i.net_payable || 0), 0);
+
+        const collInSlot = todayLedger
+          .filter((l) => {
+            const d = new Date(l.date_time);
+            const h = isNaN(d.getTime()) ? 10 : d.getHours();
+            return h > prevHour && h <= s.hour;
+          })
+          .reduce((acc, l) => acc + Number(l.credit || 0), 0);
+
+        return { name: s.label_en, Sales: salesInSlot, Collection: collInSlot };
+      });
+
+      return { bn, en, hasData: totalSales > 0 || totalColl > 0 };
+    }
+
+    if (range === '7d') {
+      const bnDays = ['রবি', 'সোম', 'মঙ্গল', 'বুধ', 'বৃহস্পতি', 'শুক্র', 'শনি'];
+      const enDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+      const bn: { name: string; Sales: number; Collection: number }[] = [];
+      const en: { name: string; Sales: number; Collection: number }[] = [];
+      let totalSales = 0;
+      let totalColl = 0;
+
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(Date.now() - i * 86400000);
+        const dStr = d.toISOString().split('T')[0];
+        const dayIdx = d.getDay();
+
+        const isToday = i === 0;
+        const nameBn = isToday ? 'আজ' : bnDays[dayIdx];
+        const nameEn = isToday ? 'Today' : enDays[dayIdx];
+
+        const daySales = this.invoices
+          .filter((inv) => inv.date_only === dStr && inv.order_status !== 'Cancelled')
+          .reduce((acc, inv) => acc + Number(inv.net_payable || 0), 0);
+
+        const dayColl = this.ledger
+          .filter((l) => l.date_only === dStr && l.credit > 0)
+          .reduce((acc, l) => acc + Number(l.credit || 0), 0);
+
+        totalSales += daySales;
+        totalColl += dayColl;
+
+        bn.push({ name: nameBn, Sales: daySales, Collection: dayColl });
+        en.push({ name: nameEn, Sales: daySales, Collection: dayColl });
+      }
+
+      return { bn, en, hasData: totalSales > 0 || totalColl > 0 };
+    }
+
+    // range === '30d' (4 Weeks)
+    const bn: { name: string; Sales: number; Collection: number }[] = [];
+    const en: { name: string; Sales: number; Collection: number }[] = [];
+    let totalSales = 0;
+    let totalColl = 0;
+
+    const weeks = [
+      { start: 28, end: 22, nameBn: '১ম সপ্তাহ', nameEn: 'Week 1' },
+      { start: 21, end: 15, nameBn: '২য় সপ্তাহ', nameEn: 'Week 2' },
+      { start: 14, end: 8, nameBn: '৩য় সপ্তাহ', nameEn: 'Week 3' },
+      { start: 7, end: 0, nameBn: '৪র্থ সপ্তাহ', nameEn: 'Week 4' },
+    ];
+
+    for (const w of weeks) {
+      const startD = new Date(Date.now() - w.start * 86400000).toISOString().split('T')[0];
+      const endD = new Date(Date.now() - w.end * 86400000).toISOString().split('T')[0];
+
+      const wSales = this.invoices
+        .filter((inv) => inv.date_only >= startD && inv.date_only <= endD && inv.order_status !== 'Cancelled')
+        .reduce((acc, inv) => acc + Number(inv.net_payable || 0), 0);
+
+      const wColl = this.ledger
+        .filter((l) => l.date_only >= startD && l.date_only <= endD && l.credit > 0)
+        .reduce((acc, l) => acc + Number(l.credit || 0), 0);
+
+      totalSales += wSales;
+      totalColl += wColl;
+
+      bn.push({ name: w.nameBn, Sales: wSales, Collection: wColl });
+      en.push({ name: w.nameEn, Sales: wSales, Collection: wColl });
+    }
+
+    return { bn, en, hasData: totalSales > 0 || totalColl > 0 };
   }
 
   // METRICS & KPIS FOR DASHBOARD

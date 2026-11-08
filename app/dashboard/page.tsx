@@ -51,6 +51,10 @@ export default function DashboardPage() {
   const [user, setUser] = useState<Employee>(erpStore.getCurrentUser());
   const [includeEmpStock, setIncludeEmpStock] = useState<boolean>(true);
   const [isMounted, setIsMounted] = useState<boolean>(false);
+  const [targetData, setTargetData] = useState(erpStore.getMonthlyTargetData());
+  const [trends, setTrends] = useState(erpStore.getSalesVsCollectionTrends('7d'));
+  const [showSetTargetModal, setShowSetTargetModal] = useState(false);
+  const [targetInput, setTargetInput] = useState('');
 
   useEffect(() => {
     setIsMounted(true);
@@ -58,76 +62,32 @@ export default function DashboardPage() {
       setMetrics(erpStore.getDashboardMetrics());
       setEmployees(erpStore.getEmployees());
       setUser(erpStore.getCurrentUser());
+      setTargetData(erpStore.getMonthlyTargetData());
+      setTrends(erpStore.getSalesVsCollectionTrends(chartRange));
     });
     return unsub;
-  }, []);
+  }, [chartRange]);
+
+  useEffect(() => {
+    setTrends(erpStore.getSalesVsCollectionTrends(chartRange));
+  }, [chartRange]);
 
   const openStaffDrawer = (emp: Employee) => {
     setSelectedStaff(emp);
     setStaffStock(erpStore.getEmpStock(emp.emp_id));
   };
 
-  // Recharts Trends with strictly separated language labels
-  const chartData7d_bn = [
-    { name: 'শনিবার', Sales: 18500, Collection: 14200 },
-    { name: 'রবিবার', Sales: 24200, Collection: 21000 },
-    { name: 'সোমবার', Sales: 31000, Collection: 28500 },
-    { name: 'মঙ্গলবার', Sales: 19800, Collection: 16500 },
-    { name: 'বুধবার', Sales: 27400, Collection: 24000 },
-    { name: 'বৃহস্পতিবার', Sales: 36500, Collection: 32000 },
-    { name: 'আজ', Sales: metrics.todaySalesAmount || 22000, Collection: metrics.todayCollected || 19500 },
-  ];
+  const currentChartData = mode === 'bn' ? trends.bn : trends.en;
 
-  const chartData7d_en = [
-    { name: 'Sat', Sales: 18500, Collection: 14200 },
-    { name: 'Sun', Sales: 24200, Collection: 21000 },
-    { name: 'Mon', Sales: 31000, Collection: 28500 },
-    { name: 'Tue', Sales: 19800, Collection: 16500 },
-    { name: 'Wed', Sales: 27400, Collection: 24000 },
-    { name: 'Thu', Sales: 36500, Collection: 32000 },
-    { name: 'Today', Sales: metrics.todaySalesAmount || 22000, Collection: metrics.todayCollected || 19500 },
-  ];
-
-  const chartDataToday_bn = [
-    { name: 'সকাল ৯টা', Sales: 3500, Collection: 2000 },
-    { name: 'সকাল ১১টা', Sales: 8200, Collection: 6500 },
-    { name: 'দুপুর ১টা', Sales: 12400, Collection: 9800 },
-    { name: 'বিকাল ৩টা', Sales: 17800, Collection: 14200 },
-    { name: 'বিকাল ৫টা', Sales: metrics.todaySalesAmount, Collection: metrics.todayCollected },
-  ];
-
-  const chartDataToday_en = [
-    { name: '09:00 AM', Sales: 3500, Collection: 2000 },
-    { name: '11:00 AM', Sales: 8200, Collection: 6500 },
-    { name: '01:00 PM', Sales: 12400, Collection: 9800 },
-    { name: '03:00 PM', Sales: 17800, Collection: 14200 },
-    { name: '05:00 PM', Sales: metrics.todaySalesAmount, Collection: metrics.todayCollected },
-  ];
-
-  const chartData30d_bn = [
-    { name: '১ম সপ্তাহ', Sales: 142000, Collection: 125000 },
-    { name: '২য় সপ্তাহ', Sales: 168000, Collection: 154000 },
-    { name: '৩য় সপ্তাহ', Sales: 195000, Collection: 172000 },
-    { name: '৪র্থ সপ্তাহ', Sales: 210000, Collection: 189000 },
-  ];
-
-  const chartData30d_en = [
-    { name: 'Week 1', Sales: 142000, Collection: 125000 },
-    { name: 'Week 2', Sales: 168000, Collection: 154000 },
-    { name: 'Week 3', Sales: 195000, Collection: 172000 },
-    { name: 'Week 4', Sales: 210000, Collection: 189000 },
-  ];
-
-  const currentChartData =
-    chartRange === 'today'
-      ? (mode === 'bn' ? chartDataToday_bn : chartDataToday_en)
-      : chartRange === '30d'
-      ? (mode === 'bn' ? chartData30d_bn : chartData30d_en)
-      : (mode === 'bn' ? chartData7d_bn : chartData7d_en);
+  const now = new Date();
+  const dayNamesBn = ['রবিবার', 'সোমবার', 'মঙ্গলবার', 'বুধবার', 'বৃহস্পতিবার', 'শুক্রবার', 'শনিবার'];
+  const monthNamesBn = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
+  const dayNamesEn = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const monthNamesEn = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
   const todayDateString = mode === 'bn'
-    ? 'আজকের দিন: রবিবার, ৮ নভেম্বর'
-    : 'Today: Sunday, November 8';
+    ? `আজকের দিন: ${dayNamesBn[now.getDay()]}, ${now.getDate()} ${monthNamesBn[now.getMonth()]}`
+    : `Today: ${dayNamesEn[now.getDay()]}, ${monthNamesEn[now.getMonth()]} ${now.getDate()}`;
 
   // Calculate displayed stock based on the optional toggle
   const displayedStockValue = includeEmpStock
@@ -407,6 +367,26 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* Zero Data Informational Notification */}
+        {!trends.hasData && (
+          <div className="mt-3 p-3 bg-zinc-900/60 border border-dashed border-zinc-800 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-zinc-400">
+            <div className="flex items-center space-x-2">
+              <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>
+                {mode === 'bn'
+                  ? 'কোনো বিক্রয় বা নগদ আদায় এখনও রেকর্ড হয়নি (সকল কাল্পনিক ডাটা সাফ করা হয়েছে)। নতুন চালান তৈরি করলে চার্ট স্বয়ংক্রিয়ভাবে সক্রিয় হবে।'
+                  : 'Zero sales & cash collection recorded yet (clean production). Chart updates automatically upon creating invoices.'}
+              </span>
+            </div>
+            <Link
+              href="/dashboard/billing"
+              className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[11px] font-semibold whitespace-nowrap transition-colors shrink-0"
+            >
+              {mode === 'bn' ? '+ নতুন চালান তৈরি করুন' : '+ Make First Bill'}
+            </Link>
+          </div>
+        )}
+
         {/* Recharts Bar Graph */}
         <div className="h-64 w-full mt-4">
           {isMounted ? (
@@ -414,7 +394,7 @@ export default function DashboardPage() {
               <BarChart data={currentChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#252628" vertical={false} />
                 <XAxis dataKey="name" stroke="#7a7d82" fontSize={11} tickLine={false} />
-                <YAxis stroke="#7a7d82" fontSize={11} tickLine={false} tickFormatter={(val) => `৳${val / 1000}k`} />
+                <YAxis stroke="#7a7d82" fontSize={11} tickLine={false} tickFormatter={(val) => val === 0 ? '৳0' : `৳${val / 1000}k`} />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: '#15161c',
@@ -565,9 +545,17 @@ export default function DashboardPage() {
             <span className="text-xs text-zinc-400 font-medium">
               {mode === 'bn' ? 'মাসিক বিক্রির টার্গেট' : 'Monthly Sales Target'}
             </span>
-            <div className="size-6 rounded-full bg-[#28292d] grid place-items-center text-emerald-400 text-xs">
-              🎯
-            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setTargetInput(targetData.targetAmount > 0 ? targetData.targetAmount.toString() : '');
+                setShowSetTargetModal(true);
+              }}
+              title={mode === 'bn' ? 'টার্গেট নির্ধারণ বা পরিবর্তন করুন' : 'Set or edit target'}
+              className="text-[11px] text-zinc-400 hover:text-white px-2 py-0.5 rounded bg-zinc-800/80 hover:bg-zinc-700 transition-colors flex items-center space-x-1"
+            >
+              <span>{targetData.isTargetSet ? (mode === 'bn' ? 'এডিট ✏️' : 'Edit ✏️') : (mode === 'bn' ? 'সেট করুন +' : 'Set +')}</span>
+            </button>
           </div>
           <div className="flex items-center space-x-3 mt-3">
             <div className="size-11 rounded-full bg-[#d9c1b3] text-[#806d63] grid place-items-center shrink-0">
@@ -575,15 +563,85 @@ export default function DashboardPage() {
             </div>
             <div>
               <div className="text-xl sm:text-2xl font-bold text-white">
-                {formatCurrency(1250000)}
+                {formatCurrency(targetData.targetAmount)}
               </div>
               <div className="inline-block mt-1 px-2 py-0.5 rounded text-xs font-semibold bg-[#806d63] text-emerald-100">
-                + ৬৮% {mode === 'bn' ? 'টার্গেট অর্জিত' : 'Target Achieved'}
+                {targetData.isTargetSet ? (
+                  mode === 'bn' ? (
+                    `+ ${targetData.percentage}% টার্গেট অর্জিত (বাকি ৳${targetData.remaining.toLocaleString()})`
+                  ) : (
+                    `+ ${targetData.percentage}% Achieved (Left ৳${targetData.remaining.toLocaleString()})`
+                  )
+                ) : (
+                  mode === 'bn' ? 'টার্গেট নির্ধারণ করা হয়নি' : 'No target set yet'
+                )}
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* MODAL: SET MONTHLY SALES TARGET */}
+      {showSetTargetModal && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#1b1c20] border border-[#252628] rounded-2xl w-full max-w-sm p-5 space-y-4 shadow-2xl animate-fade-in">
+            <div className="flex items-center justify-between pb-3 border-b border-[#252628]">
+              <div className="flex items-center space-x-2">
+                <TrendingUp className="size-5 text-emerald-400" />
+                <h3 className="font-bold text-sm text-white">
+                  {mode === 'bn' ? 'চলতি মাসের বিক্রয় লক্ষ্যমাত্রা' : 'Monthly Sales Target'}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowSetTargetModal(false)}
+                className="text-zinc-400 hover:text-white"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            <div className="space-y-1.5 text-xs text-zinc-400">
+              <p>
+                {mode === 'bn'
+                  ? 'এই মাসের জন্য আপনার প্রতিষ্ঠানের মোট বিক্রয় লক্ষ্যমাত্রা (টাকায়) নির্ধারণ করুন:'
+                  : 'Enter total monthly sales target in BDT for your company:'}
+              </p>
+              <input
+                type="number"
+                min="0"
+                step="5000"
+                placeholder={mode === 'bn' ? 'যেমন: 500000' : 'e.g. 500000'}
+                value={targetInput}
+                onChange={(e) => setTargetInput(e.target.value)}
+                className="w-full h-11 px-3 bg-[#0b0c10] border border-[#252628] focus:border-emerald-500 rounded-xl text-base text-white font-bold outline-none"
+              />
+            </div>
+
+            <div className="flex space-x-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setShowSetTargetModal(false)}
+                className="flex-1 py-2.5 rounded-xl border border-zinc-700 text-xs font-semibold text-zinc-300 hover:bg-zinc-800 transition-colors"
+              >
+                {mode === 'bn' ? 'বাতিল' : 'Cancel'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const val = parseFloat(targetInput) || 0;
+                  erpStore.setMonthlyCompanyTarget(val);
+                  setTargetData(erpStore.getMonthlyTargetData());
+                  setShowSetTargetModal(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white transition-colors shadow-lg shadow-emerald-950/40"
+              >
+                {mode === 'bn' ? 'সংরক্ষণ করুন' : 'Save Target'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* QUICK DRAWER FOR SELECTED STAFF MEMBER */}
       {selectedStaff && (
